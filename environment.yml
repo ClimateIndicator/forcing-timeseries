@@ -1,0 +1,13 @@
+name: climate-change-tracker
+channels:
+  - conda-forge
+  - chrisroadmap
+dependencies:
+  - fair==2.1.0
+  - jupyter
+  - matplotlib
+  - nbstripout
+  - numpy
+  - pandas
+  - scipy
+  - tqdm
