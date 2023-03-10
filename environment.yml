@@ -9,5 +9,6 @@ dependencies:
   - nbstripout
   - numpy
   - pandas
+  - pooch
   - scipy
   - tqdm
