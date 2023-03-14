@@ -1,6 +1,9 @@
 # OS junk
 .DS_Store
 
+# non-public datasets
+data/volcanic_aod
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
