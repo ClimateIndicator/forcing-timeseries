@@ -5,7 +5,7 @@
 data/volcanic_aod
 
 # large output
-output/ERF_ensemble.nc
+output/*.nc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
