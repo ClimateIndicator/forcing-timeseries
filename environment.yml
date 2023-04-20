@@ -1,4 +1,4 @@
-name: climate-change-tracker
+name: forcing-timeseries
 channels:
   - conda-forge
   - chrisroadmap
