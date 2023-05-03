@@ -14,7 +14,7 @@ As part of the ERF time series, emissions are processed from CEDS and GFED.
 The code also provides a probabilistic ensemble of 1000 forcing time series for the detection and attribution of climate change.
 
 Code also caculates decadal rates of ERF change and human induced warming change
-![Line plot of time series of decadal rates of change in effective radiative forcing and human induced warming 1970-2022](plots/decadal_trends.png.png)
+![Line plot of time series of decadal rates of change in effective radiative forcing and human induced warming 1970-2022](plots/decadal_trends.png)
 
 ## Reproducibility
 
