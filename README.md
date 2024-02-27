@@ -2,8 +2,8 @@
 
 This repository generates the following data and plots from the Climate Indicator Project:
 
-- Greenhouse gas concentrations 1750-2022
-- Effective radiative forcing 1750-2022
+- Greenhouse gas concentrations 1750-2023
+- Effective radiative forcing 1750-2023
 
 As part of the ERF time series, emissions are processed from CEDS and GFED.
 
