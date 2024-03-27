@@ -1,39 +1,22 @@
 # --------------------------------------------------------------------
 # USE OF NOAA GML DATA
 # 
-# These data are made freely available to the public and the
-# scientific community in the belief that their wide dissemination
-# will lead to greater understanding and new scientific insights.
-# The availability of these data does not constitute publication
-# of the data.  NOAA relies on the ethics and integrity of the user to
-# ensure that GML receives fair credit for their work.  If the data 
-# are obtained for potential use in a publication or presentation, 
-# GML should be informed at the outset of the nature of this work.  
-# If the GML data are essential to the work, or if an important 
-# result or conclusion depends on the GML data, co-authorship
-# may be appropriate.  This should be discussed at an early stage in
-# the work.  Manuscripts using the GML data should be sent to GML
-# for review before they are submitted for publication so we can
-# ensure that the quality and limitations of the data are accurately
-# represented.
+# These data are made freely available to the public and the scientific
+# community in the belief that their wide dissemination will lead to
+# greater understanding and new scientific insights. To ensure that GML
+# receives fair credit for their work please include relevant citation
+# text in publications. We encourage users to contact the data providers,
+# who can provide detailed information about the measurements and
+# scientific insight.  In cases where the data are central to a
+# publication, coauthorship for data providers may be appropriate.
+# 
+# 
 # 
 # Contact:  Xin Lan (xin.lan@noaa.gov)
 # 
-# File Creation: Sun Mar  5 03:55:20 2023
+# File Creation: Mon Feb  5 03:55:21 2024
 # 
-# RECIPROCITY
 # 
-# Use of these data implies an agreement to reciprocate.
-# Laboratories making similar measurements agree to make their
-# own data available to the general public and to the scientific
-# community in an equally complete and easily accessible form.
-# Modelers are encouraged to make available to the community,
-# upon request, their own tools used in the interpretation
-# of the GML data, namely well documented model code, transport
-# fields, modeled mole fractions, and additional information 
-# necessary for other scientists to repeat the work and to run 
-# modified versions. Model availability includes collaborative 
-# support for new users of the models.
 # --------------------------------------------------------------------
 # 
 # 
@@ -54,47 +37,47 @@
 # reasons.  Usually these changes are minor.
 # 
 # year     mean      unc
-  1979   336.85     0.10
+  1979   336.85     0.11
   1980   338.91     0.07
-  1981   340.11     0.08
+  1981   340.11     0.09
   1982   340.86     0.03
-  1983   342.53     0.05
-  1984   344.07     0.07
+  1983   342.53     0.06
+  1984   344.07     0.08
   1985   345.54     0.07
   1986   346.97     0.07
-  1987   348.68     0.09
+  1987   348.68     0.10
   1988   351.16     0.07
-  1989   352.79     0.06
+  1989   352.79     0.07
   1990   354.06     0.07
-  1991   355.39     0.06
+  1991   355.39     0.07
   1992   356.09     0.06
   1993   356.83     0.07
-  1994   358.33     0.07
+  1994   358.33     0.08
   1995   360.17     0.05
   1996   361.93     0.04
   1997   363.04     0.05
   1998   365.70     0.04
-  1999   367.79     0.07
+  1999   367.79     0.05
   2000   368.96     0.06
-  2001   370.58     0.05
+  2001   370.57     0.05
   2002   372.58     0.04
   2003   375.14     0.04
   2004   376.95     0.06
   2005   378.98     0.05
   2006   381.15     0.05
-  2007   382.90     0.05
+  2007   382.90     0.04
   2008   385.02     0.05
   2009   386.50     0.04
   2010   388.76     0.06
-  2011   390.63     0.06
-  2012   392.65     0.07
+  2011   390.63     0.05
+  2012   392.65     0.06
   2013   395.40     0.06
   2014   397.34     0.05
   2015   399.65     0.05
-  2016   403.07     0.07
+  2016   403.07     0.06
   2017   405.22     0.07
   2018   407.61     0.07
-  2019   410.08     0.08
+  2019   410.07     0.07
   2020   412.44     0.06
-  2021   414.71     0.06
-  2022   417.07     0.15
+  2021   414.70     0.07
+  2022   417.07     0.07

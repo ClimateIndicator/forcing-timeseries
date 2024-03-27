@@ -7,6 +7,8 @@ This repository generates the following data and plots from the Climate Indicato
 
 As part of the ERF time series, emissions are processed from CEDS and GFED.
 
+> NOTE: this data is preliminary and subject to change, possibly quite substantially, as assessments are revised.
+
 ![Bar plot of effective radiative forcing 1750-2023](plots/ERF_1750-2023.png)
 
 ![Line plot of time series of effective radiative forcing 1750-2023](plots/ERF_timeseries_1750-2023.png)

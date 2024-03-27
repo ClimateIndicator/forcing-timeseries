@@ -1,39 +1,22 @@
 # --------------------------------------------------------------------
 # USE OF NOAA GML DATA
 # 
-# These data are made freely available to the public and the
-# scientific community in the belief that their wide dissemination
-# will lead to greater understanding and new scientific insights.
-# The availability of these data does not constitute publication
-# of the data.  NOAA relies on the ethics and integrity of the user to
-# ensure that GML receives fair credit for their work.  If the data 
-# are obtained for potential use in a publication or presentation, 
-# GML should be informed at the outset of the nature of this work.  
-# If the GML data are essential to the work, or if an important 
-# result or conclusion depends on the GML data, co-authorship
-# may be appropriate.  This should be discussed at an early stage in
-# the work.  Manuscripts using the GML data should be sent to GML
-# for review before they are submitted for publication so we can
-# ensure that the quality and limitations of the data are accurately
-# represented.
+# These data are made freely available to the public and the scientific
+# community in the belief that their wide dissemination will lead to
+# greater understanding and new scientific insights. To ensure that GML
+# receives fair credit for their work please include relevant citation
+# text in publications. We encourage users to contact the data providers,
+# who can provide detailed information about the measurements and
+# scientific insight.  In cases where the data are central to a
+# publication, coauthorship for data providers may be appropriate.
+# 
+# 
 # 
 # Contact:  Xin Lan (xin.lan@noaa.gov)
 # 
-# File Creation: Mon Mar  6 09:57:15 2023
+# File Creation: Mon Feb  5 10:25:14 2024
 # 
-# RECIPROCITY
 # 
-# Use of these data implies an agreement to reciprocate.
-# Laboratories making similar measurements agree to make their
-# own data available to the general public and to the scientific
-# community in an equally complete and easily accessible form.
-# Modelers are encouraged to make available to the community,
-# upon request, their own tools used in the interpretation
-# of the GML data, namely well documented model code, transport
-# fields, modeled mole fractions, and additional information 
-# necessary for other scientists to repeat the work and to run 
-# modified versions. Model availability includes collaborative 
-# support for new users of the models.
 # --------------------------------------------------------------------
 # 
 # 
@@ -61,41 +44,42 @@
 # 
 
 # year     mean      unc
-  1984  1644.85     0.68
-  1985  1657.29     0.67
-  1986  1670.09     0.82
-  1987  1682.70     0.48
-  1988  1693.23     0.66
-  1989  1704.53     0.54
-  1990  1714.49     0.69
+  1984  1644.84     0.67
+  1985  1657.29     0.59
+  1986  1670.09     0.74
+  1987  1682.69     0.49
+  1988  1693.21     0.67
+  1989  1704.52     0.55
+  1990  1714.47     0.68
   1991  1724.76     0.72
-  1992  1735.48     0.60
-  1993  1736.53     0.44
-  1994  1742.07     0.63
-  1995  1748.88     0.47
-  1996  1751.28     0.63
-  1997  1754.48     0.36
-  1998  1765.54     0.58
-  1999  1772.32     0.54
-  2000  1773.22     0.63
-  2001  1771.21     0.53
-  2002  1772.68     0.55
-  2003  1777.33     0.52
-  2004  1777.05     0.46
-  2005  1774.26     0.55
-  2006  1774.94     0.48
-  2007  1781.38     0.60
-  2008  1787.01     0.61
-  2009  1793.53     0.65
-  2010  1798.91     0.63
-  2011  1803.14     0.60
-  2012  1808.12     0.50
+  1992  1735.48     0.57
+  1993  1736.48     0.46
+  1994  1742.05     0.58
+  1995  1748.88     0.48
+  1996  1751.30     0.68
+  1997  1754.51     0.42
+  1998  1765.54     0.64
+  1999  1772.30     0.64
+  2000  1773.22     0.81
+  2001  1771.22     0.59
+  2002  1772.66     0.55
+  2003  1777.33     0.50
+  2004  1777.05     0.50
+  2005  1774.25     0.64
+  2006  1774.94     0.56
+  2007  1781.38     0.63
+  2008  1787.01     0.77
+  2009  1793.54     0.69
+  2010  1798.91     0.73
+  2011  1803.15     0.63
+  2012  1808.12     0.63
   2013  1813.43     0.66
-  2014  1822.54     0.51
-  2015  1834.21     0.53
-  2016  1843.12     0.55
-  2017  1849.58     0.59
-  2018  1857.33     0.86
-  2019  1866.58     0.62
-  2020  1878.94     0.59
-  2021  1895.40     0.61
+  2014  1822.54     0.53
+  2015  1834.21     0.55
+  2016  1843.12     0.68
+  2017  1849.58     0.64
+  2018  1857.33     0.82
+  2019  1866.58     0.60
+  2020  1878.94     0.56
+  2021  1895.36     0.55
+  2022  1911.84     0.78

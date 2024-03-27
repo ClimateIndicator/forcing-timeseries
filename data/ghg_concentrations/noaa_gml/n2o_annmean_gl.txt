@@ -1,39 +1,22 @@
 # --------------------------------------------------------------------
 # USE OF NOAA GML DATA
 # 
-# These data are made freely available to the public and the
-# scientific community in the belief that their wide dissemination
-# will lead to greater understanding and new scientific insights.
-# The availability of these data does not constitute publication
-# of the data.  NOAA relies on the ethics and integrity of the user to
-# ensure that GML receives fair credit for their work.  If the data 
-# are obtained for potential use in a publication or presentation, 
-# GML should be informed at the outset of the nature of this work.  
-# If the GML data are essential to the work, or if an important 
-# result or conclusion depends on the GML data, co-authorship
-# may be appropriate.  This should be discussed at an early stage in
-# the work.  Manuscripts using the GML data should be sent to GML
-# for review before they are submitted for publication so we can
-# ensure that the quality and limitations of the data are accurately
-# represented.
+# These data are made freely available to the public and the scientific
+# community in the belief that their wide dissemination will lead to
+# greater understanding and new scientific insights. To ensure that GML
+# receives fair credit for their work please include relevant citation
+# text in publications. We encourage users to contact the data providers,
+# who can provide detailed information about the measurements and
+# scientific insight.  In cases where the data are central to a
+# publication, coauthorship for data providers may be appropriate.
+# 
+# 
 # 
 # Contact:  Xin Lan (xin.lan@noaa.gov)
 # 
-# File Creation: Mon Mar  6 10:09:22 2023
+# File Creation: Mon Feb  5 10:28:32 2024
 # 
-# RECIPROCITY
 # 
-# Use of these data implies an agreement to reciprocate.
-# Laboratories making similar measurements agree to make their
-# own data available to the general public and to the scientific
-# community in an equally complete and easily accessible form.
-# Modelers are encouraged to make available to the community,
-# upon request, their own tools used in the interpretation
-# of the GML data, namely well documented model code, transport
-# fields, modeled mole fractions, and additional information 
-# necessary for other scientists to repeat the work and to run 
-# modified versions. Model availability includes collaborative 
-# support for new users of the models.
 # --------------------------------------------------------------------
 # 
 # 
@@ -61,24 +44,25 @@
 # 
 
 # year     mean      unc
-  2001   316.36     0.14
-  2002   316.94     0.12
-  2003   317.63     0.12
-  2004   318.26     0.12
-  2005   318.91     0.10
-  2006   319.82     0.13
+  2001   316.36     0.13
+  2002   316.94     0.13
+  2003   317.63     0.14
+  2004   318.26     0.13
+  2005   318.91     0.12
+  2006   319.82     0.12
   2007   320.44     0.13
-  2008   321.50     0.13
+  2008   321.50     0.14
   2009   322.27     0.12
   2010   323.19     0.12
-  2011   324.21     0.12
+  2011   324.21     0.13
   2012   325.05     0.12
   2013   325.94     0.12
-  2014   327.08     0.12
-  2015   328.17     0.12
-  2016   328.95     0.12
-  2017   329.74     0.11
-  2018   330.90     0.12
+  2014   327.09     0.12
+  2015   328.17     0.11
+  2016   328.95     0.11
+  2017   329.74     0.13
+  2018   330.90     0.13
   2019   331.88     0.12
   2020   333.03     0.13
-  2021   334.31     0.11
+  2021   334.31     0.12
+  2022   335.65     0.12
