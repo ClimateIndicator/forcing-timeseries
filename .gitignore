@@ -4,6 +4,7 @@
 # non-public datasets
 data/volcanic_aod
 data/contrails/OIWORLD-2023-1-EN-20231014T121149.csv
+data/mls
 
 # large output
 output/*.nc

@@ -3,8 +3,10 @@ channels:
   - conda-forge
   - chrisroadmap
 dependencies:
+  - climateforcing>=0.3.0
   - h5py
   - fair==2.1.4
+  - iris
   - jupyter
   - matplotlib
   - nbstripout
