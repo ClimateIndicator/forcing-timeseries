@@ -29,7 +29,11 @@ The code is a series of notebooks in the `notebooks` folder. Some generate emiss
 - `contrails.ipynb`
 - `biomass-emissions.ipynb`
 - `slcf-emissions.ipynb`
+- `shipping-alternative.ipynb`
+- `slcf-comparison.ipynb`
 - `trace-gas-global-mean.ipynb`
+- `invert-concentrations.ipynb`
+- `mls-data.ipynb` (then, run radiative transfer scheme)
 - `volcanic-forcing.ipynb`
 - `make-forcing.ipynb`
 - `forcing-analysis.ipynb`
