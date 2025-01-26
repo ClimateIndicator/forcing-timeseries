@@ -1,3 +1,6 @@
+# don't put jupyter files under version control with jupytext
+*.ipynb
+
 # OS junk
 .DS_Store
 
