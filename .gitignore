@@ -9,6 +9,7 @@ data/volcanic_aod
 data/contrails/OIWORLD*
 data/mls
 data/slcf_emissions/cams/*.nc
+data/slcf_emissions/merra
 
 # large output
 output/*.nc
