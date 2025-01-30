@@ -5,11 +5,12 @@ channels:
 dependencies:
   - climateforcing>=0.3.0
   - h5py
-  - fair==2.1.4
+  - fair==2.2.2
   - iris
   - jupyter
+  - jupytext
   - matplotlib
-  - nbstripout
+  - nco
   - netcdf4
   - numpy
   - pandas
