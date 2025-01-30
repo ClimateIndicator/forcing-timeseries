@@ -2,14 +2,16 @@
 
 This repository generates the following data and plots from the Climate Indicator Project:
 
-- Greenhouse gas concentrations 1750-2023
-- Effective radiative forcing 1750-2023
+- Greenhouse gas concentrations 1750-2024
+- Effective radiative forcing 1750-2024
 
 As part of the ERF time series, emissions are processed from CEDS and GFED.
 
-![Bar plot of effective radiative forcing 1750-2023](plots/ERF_1750-2023.png)
+**Please note that 2024 data is preliminary; in many cases it is based on extrapolations and estimates. The data will not be final until IGCC 2024 is published in early summer 2025.**
 
-![Line plot of time series of effective radiative forcing 1750-2023](plots/ERF_timeseries_1750-2023.png)
+![Bar plot of effective radiative forcing 1750-2024](plots/ERF_1750-2024.png)
+
+![Line plot of time series of effective radiative forcing 1750-2024](plots/ERF_timeseries_1750-2024.png)
 
 The code also provides a probabilistic ensemble of 1000 forcing time series for the detection and attribution of climate change.
 

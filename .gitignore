@@ -4,12 +4,13 @@
 # OS junk
 .DS_Store
 
-# non-public datasets
+# large and non-public datasets
 data/volcanic_aod
 data/contrails/OIWORLD*
 data/mls
 data/slcf_emissions/cams/*.nc
 data/slcf_emissions/merra
+data/era5
 
 # large output
 output/*.nc
