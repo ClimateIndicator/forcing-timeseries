@@ -27,6 +27,7 @@
 # - water vapour from HTHH is an estimate for 2024
 # - GFED is assumed mean of last 5 years beyond 2023
 # - stratospheric water vapour scales with methane concentrations not methane forcing
+# - land use change is from LUH2 + GCB2024 for albedo and FAO for irrigation, replacing the cumulative CO2 AFOLU estimate **and we also update the uncertainties to take into account the separate assessments on these ranges**
 
 # %%
 import copy
@@ -135,7 +136,7 @@ unc_ranges = {
     'H2O_stratospheric': 1.00/NINETY_TO_ONESIGMA,      # stratospheric WV from CH4
     'contrails':    0.70/NINETY_TO_ONESIGMA,      # contrails approx - half-normal
     'BC_on_snow':   1.25/NINETY_TO_ONESIGMA,      # bc on snow - half-normal
-    'land_use':     0.50/NINETY_TO_ONESIGMA,      # land use change
+    'land_albedo':  (2/3)/NINETY_TO_ONESIGMA,      # land use change  -0.25 to -0.05 W/m2 ONE STANDARD DEVIATION: GHIMIRE (IPCC chapter might be a typo as says ± 0.01 W/m2)
     'volcanic':     0.25/NINETY_TO_ONESIGMA,  # volcanic
     'solar': 0.5/NINETY_TO_ONESIGMA,      # solar (amplitude)
 }
@@ -162,6 +163,7 @@ def opt(x, q05_desired, q50_desired, q95_desired):
 
 # %%
 lapsi_params = scipy.optimize.root(opt, [1, 1, 1], args=(0, 1, 2.25)).x
+irrigation_params = scipy.optimize.root(opt, [1.5, 0.5, 1], args=(-1, 1, 2)).x  # -0.1 to +0.05, best -0.05, so -1 to +2 x best
 contrails_params = scipy.optimize.root(opt, [1, 1, 1], args=(19 / 57, 1, 98 / 57)).x
 
 # %%
@@ -182,6 +184,14 @@ scale_df['contrails'] = scipy.stats.skewnorm.rvs(
     random_state=3701585,
 )
 
+scale_df['irrigation'] = scipy.stats.skewnorm.rvs(
+    irrigation_params[0],
+    loc=irrigation_params[1],
+    scale=irrigation_params[2],
+    size=SAMPLES,
+    random_state=13710426,
+)
+
 trend_solar = scipy.stats.norm.rvs(
     size=SAMPLES, 
     loc=0.00, 
@@ -190,7 +200,10 @@ trend_solar = scipy.stats.norm.rvs(
 )
 
 # %%
-scale_df
+irrigation_params
+
+# %%
+pl.hist(scale_df['irrigation'], bins=50)
 
 # %% [markdown]
 # ### Solar radiation
@@ -572,22 +585,30 @@ forcing['contrails'][180:] = df_contrails.values.squeeze()
 # %% [markdown]
 # ### Land use forcing
 #
-# Use cumulative land use CO2 emissions, scale to -0.2 W/m2 for 1750 to 2019. Demonstrate this is fairly close to an observational estimate (Ghimire et al. 2015)
+# Now: take separate time series for land use and irrigation
+#
+# Also compare to cumulative land use CO2 emissions, scale to -0.2 W/m2 for 1750 to 2019 (the old way of doing things)
 
 # %%
 df_gcp = pd.read_csv('../data/gcp_emissions/gcp_2024.csv', index_col=0)
+df_luprocess = pd.read_csv('../output/land_use_1750-2024.csv', index_col=0)
 
 # %%
 df_gcp['AFOLU']
+
+# %%
+df_luprocess
 
 # %%
 lusf2019 = -0.20/(np.cumsum(df_gcp['AFOLU']).loc[2019] - df_gcp.loc[1750, 'AFOLU'])
 lusf2019
 
 # %%
-forcing['land_use'] = (np.cumsum(df_gcp['AFOLU']) - df_gcp.loc[1750, 'AFOLU']).values*lusf2019
+forcing['land_use'] = df_luprocess['total'].values
+landuse_from_co2_afolu = (np.cumsum(df_gcp['AFOLU']) - df_gcp.loc[1750, 'AFOLU']).values*lusf2019
 
 # %%
+pl.plot(landuse_from_co2_afolu)
 pl.plot(forcing['land_use'])
 
 # %% [markdown]
@@ -929,14 +950,22 @@ type(forcing['H2O_stratospheric']) == pd.core.series.Series
 pd.DataFrame(forcing, index=np.arange(1750, 2025)).to_csv('../output/ERF_best_1750-2024.csv')
 
 # %%
+# aggregate land use first
+irr_ensemble = df_luprocess['irrigation'].values[:, None] * scale_df['irrigation'].values[None,:]
+lu_ensemble = df_luprocess['LUH2-GCB2024_rescaled'].values[:, None] * scale_df['land_albedo'].values[None,:]
+
+# %%
+forcing_ensemble['land_use'] = irr_ensemble + lu_ensemble
+
+# %%
 for agent in tqdm(forcing):
-    if agent not in ['aerosol-radiation_interactions', 'aerosol-cloud_interactions', 'solar']:
+    if agent not in ['aerosol-radiation_interactions', 'aerosol-cloud_interactions', 'solar', 'land_use']:
         if type(forcing[agent]) == pd.core.series.Series:
             forcing[agent] = forcing[agent].values
         forcing_ensemble[agent] = forcing[agent][:,None] * scale_df[agent].values[None,:]
 
 # %%
-#forcing_ensemble
+forcing_ensemble
 
 # %%
 forcing_ensemble_sum = np.zeros((275, SAMPLES))
