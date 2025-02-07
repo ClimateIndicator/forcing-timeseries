@@ -40,10 +40,10 @@ df_landuse.columns
 df_landuse.loc[2019, 'LUH2-GCB2024']
 
 # %%
-pl.plot(-0.15 / df_landuse.loc[2004, 'LUH1-CMIP5'] * df_landuse['LUH2-GCB2024'])
+pl.plot(-0.15 / df_landuse.loc[2005, 'LUH2-GCB2024'] * df_landuse['LUH2-GCB2024'])
 
 # %%
-df_landuse['LUH2-GCB2024_rescaled'] = -0.15 / df_landuse.loc[2004, 'LUH1-CMIP5'] * df_landuse['LUH2-GCB2024']
+df_landuse['LUH2-GCB2024_rescaled'] = -0.15 / df_landuse.loc[2004, 'LUH2-GCB2024'] * df_landuse['LUH2-GCB2024']
 
 # %%
 # estimate 2024 based on persistence
