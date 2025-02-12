@@ -15,7 +15,7 @@
 # %% [markdown]
 # # Download and process biomass burning emissions
 #
-# **note: as of 2025-01-26, the 2024 beta does not yet exist**
+# **note: as of 2025-02-12, the 2024 beta does not yet exist**
 #
 # Also, the hashes of the 2017-2022 "beta" files have changed on 2023-09-18, which means the data may also have changed.
 #

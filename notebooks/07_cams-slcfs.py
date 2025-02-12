@@ -18,6 +18,17 @@
 # CAMS includes agricultural waste burning in their sectoral totals, so need to remove this for comparison to CEDS.
 #
 # We see that there is quite a lot of disagreement between the datasets; let's use CAMS to extend CEDS by taking the ratio of CAMS in 2023 and 2024 to 2022
+#
+# **CEDS 2023 should be ready in the not too distant future**
+#
+# **Lara Aleluia (CMCC) will check the CAMS emissions as part of ScenarioMIP - good to cross ref**
+#
+# Unfortunately there doesn't seem to be a way to automate downloads of CAMS data. Do this:
+#
+# - https://eccad.sedoo.fr/#/data
+# - select CAMS-GLOB_ANT v6.2
+# - select species
+# - select Sum Sectors and Agricultural Waste Burning
 
 # %%
 import numpy as np
@@ -28,6 +39,17 @@ import warnings
 
 # %%
 species = ['SO2', 'BC', 'OC', 'NMVOC', 'NOx', 'NH3', 'CO']
+
+# %%
+species_subs = {specie: specie for specie in species}
+species_subs['NMVOC'] = 'NMV'
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    emissions_annual = {}
+    for specie in species:
+        emissions_monthly = pd.read_csv(f'../data/slcf_emissions/cams/cams-glob-ant-anthro-{species_subs[specie].lower()}.csv', parse_dates=['Date'])
+emissions_monthly#.groupby(emissions_monthly.Date.year)
+emissions_monthly.Date
 
 # %%
 with warnings.catch_warnings():
