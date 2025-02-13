@@ -1,5 +1,7 @@
 # Effective radiative forcing time series
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10706344.svg)](https://doi.org/10.5281/zenodo.10706344)
+
 This repository generates the following data and plots from the Climate Indicator Project:
 
 - Greenhouse gas concentrations 1750-2024
