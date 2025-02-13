@@ -52,7 +52,7 @@ gfed41s_df = pd.read_csv('../output/gfed4.1s_1997-2024.csv', index_col=0)
 gfed41s_df
 
 # %%
-cams_df = pd.read_csv('../output/cams_2000-2024.csv', index_col=0)
+cams_df = pd.read_csv('../output/cams_2000-2025.csv', index_col=0)
 cams_df
 
 # %%
@@ -110,7 +110,7 @@ for specie in species:
 
     # assume ratio for 2023 and 2024 in CEDS based on 2022 in CAMS
     slcf_df.loc[2023:2024, specie] = (
-        cams_df.loc[2023:, specie] / cams_df.loc[2022, specie] * ceds_df.loc[2022, specie] + 
+        cams_df.loc[2023:2024, specie] / cams_df.loc[2022, specie] * ceds_df.loc[2022, specie] + 
         gfed41s_df.loc[2023:2024, specie] * gfed_convert[specie]
     )
 

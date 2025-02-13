@@ -76,7 +76,7 @@ for ispec, specie in enumerate(species):
     if specie=='OC':
         ax[irow,icol].plot(np.arange(2000, 2026), 1.4 * cams_df.loc[:, specie], label='CAMS * 1.4')
     elif specie=='NOx':
-        ax[irow,icol].plot(np.arange(2000, 2026), 46.006/30.006 * cams_df.loc[:, specie], label='CAMS * 1.53')
+        ax[irow,icol].plot(np.arange(2000, 2026), 46.006/30.006 * cams_df.loc[:, specie], label='CAMS * 46/30')
     ax[irow,icol].set_title(specie)
     ax[irow,icol].set_ylim(0, 1.05 * np.max((cams_df.loc[:, specie].max(), ceds_df.loc[:, specie].max())))
     ax[irow,icol].legend();

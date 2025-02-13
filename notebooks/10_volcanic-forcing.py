@@ -28,7 +28,7 @@
 # - Download data from: https://asdc.larc.nasa.gov/project/GloSSAC/GloSSAC_2.22. Click "Get Dataset". Put this in '../data/volcanic_aod/GloSSAC_V2.22.nc'
 # - Download data from: https://omps.gesdisc.eosdis.nasa.gov/data/SNPP_OMPS_Level3/OMPS_NPP_LP_L3_AER_MONTHLY.1/. Obtain every *.h5 file in every annual sub-directory from 2013 to 2024. Put these files in '../data/volcanic_aod/SNPP_OMPS_Level3/
 #
-# In addition, we require estimates of the stratospheric water vapour injection from Hunga Tonga. This does not appear in the actual calculation here. In 2022, we added +0.12 W/m2 from Jenkins et al. (2023). In the 2023 update, we take and process actual MLS data and run the RTM offline to get updated estimates of +0.14 W/m2 for 2022 and +0.18 W/m2 for 2023. **The MLS data for 2024 is currently unavailable, and as the instrument is beyond its end of life, this dataset may no longer be updated.**
+# In addition, we require estimates of the stratospheric water vapour injection from Hunga Tonga. The MLS data is processed in notebook 09, taken and run in the offline radiative transfer code, and implemented back here.
 #
 # For bonus points we should consider stratospheric water vapour in historical eruptions, though this is not easy to get.
 
@@ -42,6 +42,9 @@ import pandas as pd
 from pooch import retrieve
 import scipy.stats
 import h5py
+
+# %%
+df_stwv = pd.read_csv('../data/volcanic_stwv/indicators_stwv_irf_hansen_tp.csv', index_col=0)
 
 # %%
 pl.rcParams['figure.figsize'] = (10/2.54, 10/2.54)
@@ -77,7 +80,7 @@ for i in range(len(time_evolv)):
     aod_evolv[i] = np.average(aod550_evolv[i,:],weights=weights)
 
 # %%
-# 1979 to 2022 from GloSSAC
+# 1979 to 2023 from GloSSAC
 nc = Dataset('../data/volcanic_aod/GloSSAC_V2.22.nc')
 data_glossac = nc.variables['Glossac_Aerosol_Optical_Depth'][:]
 lat_glossac = nc.variables['lat'][:]
@@ -232,52 +235,16 @@ pl.savefig('../plots/volcanic_AOD.pdf')
 erf_sulf = -20 * (aod - np.mean(aod[:(11262*12)]))
 erf_h2o = np.zeros_like(erf_sulf)
 
-# hunga tonga adjustment - this comes from an offline radiative transfer simulation (but everything prepared here)
-# however!! we don't have MLS data for 2024 yet, so I will preserve the seasonal cycle from 2023, and start ramping
-# down at the rate of 1/7 per year (Jenkins et al. 2022)
-erf_h2o[-36:] = np.array([
-    0.056142705,
-    0.124763041,
-    0.134787523,
-    0.140017655,
-    0.148023525,
-    0.149671158,
-    0.148921003,
-    0.145035717,
-    0.146799994,
-    0.154511014,
-    0.165538079,
-    0.184053622,
-    0.19959181,
-    0.201186799,
-    0.189308977,
-    0.187860589,
-    0.188655669,
-    0.17539622,
-    0.164919464,
-    0.168585382,
-    0.166695728,
-    0.175021385,
-    0.181187582,
-    0.185611578,
-    0.19959181 * 83/84,
-    0.201186799 * 82/84,
-    0.189308977 * 81/84,
-    0.187860589 * 80/84,
-    0.188655669 * 79/84,
-    0.17539622 * 78/84,
-    0.164919464 * 77/84,
-    0.168585382 * 76/84,
-    0.166695728 * 75/84,
-    0.175021385 * 74/84,
-    0.181187582 * 73/84,
-    0.185611578 * 72/84,
-])
+for im, month in enumerate(range(216, 252)):
+    mod12 = month%12       
+    erf_h2o[-36+im] = (df_stwv.iloc[month]-df_stwv.iloc[mod12:18*12:12].mean())
+
 
 erf = erf_sulf + erf_h2o
 
 # %%
 pl.plot(np.arange(1975+1/24,2025+1/24,1/12), erf_sulf[-(12*50):], label='AOD', color='skyblue')
+pl.plot(np.arange(2021+23/24,2025,1/12), erf_h2o[-37:], label='H$_2$O', color='green')
 pl.plot(np.arange(2021+23/24,2025,1/12), erf[-37:], label='AOD + H$_2$O', color='purple')
 pl.title('Volcanic effective radiative forcing')
 pl.xlim(1975, 2025)
