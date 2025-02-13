@@ -17,6 +17,8 @@
 #
 # **update Jan 2025: while we wait for Brad and Lindsay's assessments, we will extrapolate last year's numbers for the preliminary WMO data.**
 #
+# **update Feb 2025: preliminary 2024 values from Lindsay in the paper draft, use these here for WMO analysis**
+#
 # IPCC AR6 methodology:
 #
 # The following description comes from the Excel sheet of long-lived greenhouse gas concentrations, v9. See https://github.com/chrisroadmap/ar6/blob/main/data_input/observations/LLGHG_history_AR6_v9_for_archive.xlsx
@@ -27,14 +29,14 @@
 #
 # https://gml.noaa.gov/aftp/data/ is usually a good place to look
 #
-# NOAA (accessed 2025-01-26):
+# NOAA (accessed 2025-02-12):
 # - https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/n2o/n2o_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/sf6/sf6_annmean_gl.txt
 # - https://gml.noaa.gov/aftp/data/hats/Total_Cl_Br/2024%20update%20total%20Cl%20Br%20&%20F.xls  (converted to CSV with header and footer rows stripped out; save as noaa_**YYYY**_global_mean_mixing_ratios.csv) **note: each year, check the FTP directory to see if there has been an annual update**
 #
-# AGAGE (accessed 2024-01-26):
+# AGAGE (accessed 2025-02-12):
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt
 #
@@ -203,10 +205,11 @@ for species in df_update.columns:
     if species in ['Halon-1202']:
         continue
     df_conc.loc[2019:2023, species] = df_update.loc[2019:2023, species]
-    # CSIRO - but is this out of date in 2024 update?!
-df_conc.loc[2023, 'CO2'] = 419.3
-df_conc.loc[2023, 'CH4'] = 1922.5
-df_conc.loc[2023, 'N2O'] = 336.9
+    
+    
+df_conc.loc[2024, 'CO2'] = 422.6
+df_conc.loc[2024, 'CH4'] = 1930.9
+df_conc.loc[2024, 'N2O'] = 337.8
 
 # %%
 df_conc

@@ -18,6 +18,17 @@
 # CAMS includes agricultural waste burning in their sectoral totals, so need to remove this for comparison to CEDS.
 #
 # We see that there is quite a lot of disagreement between the datasets; let's use CAMS to extend CEDS by taking the ratio of CAMS in 2023 and 2024 to 2022
+#
+# **CEDS 2023 should be ready in the not too distant future**
+#
+# **Lara Aleluia (CMCC) will check the CAMS emissions as part of ScenarioMIP - good to cross ref**
+#
+# Unfortunately there doesn't seem to be a way to automate downloads of CAMS data. Do this:
+#
+# - https://eccad.sedoo.fr/#/data
+# - select CAMS-GLOB_ANT v6.2
+# - select species
+# - select Sum Sectors and Agricultural Waste Burning
 
 # %%
 import numpy as np
@@ -30,16 +41,20 @@ import warnings
 species = ['SO2', 'BC', 'OC', 'NMVOC', 'NOx', 'NH3', 'CO']
 
 # %%
+cams_df = pd.DataFrame()
+species_subs = {specie: specie for specie in species}
+species_subs['NMVOC'] = 'NMV'
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     emissions_annual = {}
     for specie in species:
-        emissions_monthly = pd.read_csv(f'../data/slcf_emissions/cams/{specie}.csv', skiprows=10, index_col=0)
-        emissions_monthly
-        mi = pd.MultiIndex.from_tuples([(c[0:4], c[5:7]) for c in emissions_monthly.columns], names=['year', 'month'])
-        emissions_monthly.columns = mi
-        emissions_annual_all_sectors = emissions_monthly.groupby('year', axis=1).sum()
-        emissions_annual[specie] = emissions_annual_all_sectors.loc['Sum_Sectors'] - emissions_annual_all_sectors.loc['Agricultural_waste_burning']
+        emissions_monthly = pd.read_csv(f'../data/slcf_emissions/cams/cams-glob-ant-anthro-{species_subs[specie].lower()}.csv', parse_dates=['Date'])
+
+        cams_df[specie] = (
+            emissions_monthly.groupby(emissions_monthly.Date.dt.year)[' Sum Sectors'].sum() -
+            emissions_monthly.groupby(emissions_monthly.Date.dt.year)[' Agricultural waste burning'].sum()
+        )
+cams_df
 
 # %%
 ceds_df = pd.DataFrame(columns = species, index=np.arange(2000, 2023, dtype=int))
@@ -56,11 +71,20 @@ fig, ax = pl.subplots(2, 4, figsize=(12, 6))
 for ispec, specie in enumerate(species):
     irow = ispec // 4
     icol = ispec % 4
-    ax[irow,icol].plot(np.arange(2000, 2025), emissions_annual[specie])
-    ax[irow,icol].plot(np.arange(2000, 2023), ceds_df.loc[:, specie])
+    ax[irow,icol].plot(np.arange(2000, 2026), cams_df.loc[:, specie], label='CAMS')
+    ax[irow,icol].plot(np.arange(2000, 2023), ceds_df.loc[:, specie], label='CEDS')
+    if specie=='OC':
+        ax[irow,icol].plot(np.arange(2000, 2026), 1.4 * cams_df.loc[:, specie], label='CAMS * 1.4')
+    elif specie=='NOx':
+        ax[irow,icol].plot(np.arange(2000, 2026), 46.006/30.006 * cams_df.loc[:, specie], label='CAMS * 46/30')
     ax[irow,icol].set_title(specie)
+    ax[irow,icol].set_ylim(0, 1.05 * np.max((cams_df.loc[:, specie].max(), ceds_df.loc[:, specie].max())))
+    ax[irow,icol].legend();
+pl.tight_layout()
+pl.savefig('../plots/cams_ceds.png')
+pl.savefig('../plots/cams_ceds.pdf')
 
 # %%
-pd.DataFrame(emissions_annual).to_csv('../output/cams_2000-2024.csv')
+cams_df.to_csv('../output/cams_2000-2025.csv')
 
 # %%
