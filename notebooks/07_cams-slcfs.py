@@ -29,6 +29,8 @@
 # - select CAMS-GLOB_ANT v6.2
 # - select species
 # - select Sum Sectors and Agricultural Waste Burning
+#
+# The CAMS-GLOB-ANT doesn't include aviation emissions, this is a separate dataset CAMS-GLOB-AIR. However, it doesn't seem that reliable, since there is no dip in emissions for COVID. The dataset also ends in 2022. Therefore the fairest direct comparison is to subtract aviation emissions out of CAMS.
 
 # %%
 import numpy as np
@@ -58,13 +60,22 @@ cams_df
 
 # %%
 ceds_df = pd.DataFrame(columns = species, index=np.arange(2000, 2023, dtype=int))
+ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(2000, 2023, dtype=int))
 
 for specie in species:
-    ceds_df.loc[:, specie] = 0.001 * pd.read_csv(
+    df_ceds_in = pd.read_csv(
         f'../data/slcf_emissions/ceds/v20240708/{specie}_CEDS_global_emissions_by_sector_v2024_07_08.csv'
-    ).sum()['X2000':].values
+    )
+    total = df_ceds_in.sum()['X2000':].values
+    aviation = df_ceds_in[df_ceds_in['sector'].isin(('1A3ai_International-aviation', '1A3aii_Domestic-aviation'))].sum()['X2000':].values
+    ceds_df.loc[:, specie] = 0.001 * total
+    ceds_no_aviation_df.loc[:, specie] = 0.001 * (total - aviation)
 
+# %%
 ceds_df
+
+# %%
+ceds_no_aviation_df
 
 # %%
 fig, ax = pl.subplots(2, 4, figsize=(12, 6))
@@ -73,6 +84,7 @@ for ispec, specie in enumerate(species):
     icol = ispec % 4
     ax[irow,icol].plot(np.arange(2000, 2026), cams_df.loc[:, specie], label='CAMS')
     ax[irow,icol].plot(np.arange(2000, 2023), ceds_df.loc[:, specie], label='CEDS')
+    ax[irow,icol].plot(np.arange(2000, 2023), ceds_no_aviation_df.loc[:, specie], label='CEDS no aviation')
     if specie=='OC':
         ax[irow,icol].plot(np.arange(2000, 2026), 1.4 * cams_df.loc[:, specie], label='CAMS * 1.4')
     elif specie=='NOx':
