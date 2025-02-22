@@ -32,7 +32,9 @@
 #
 # **CEDS 2023 should be ready in the not too distant future**
 #
-# I'm using the processed data from ScenarioMIP prepared by Marco Gambirini (the totals are basically identical to doing the following steps, but Marco has retained the sectoral detail). Marco adds aviation in, so I take it back out.
+# I'm using the processed data from ScenarioMIP prepared by Marco Gambarini (the totals are basically identical to doing the following steps, but Marco has retained the sectoral detail). Marco adds aviation in, so I take it back out.
+#
+# This file is processed by the IIASA Emissions Historical time series at https://github.com/iiasa/emissions_harmonization_historical/blob/main/notebooks/0110_CAMS.py
 #
 # Unfortunately there doesn't seem to be a way to automate downloads of CAMS data, so if you want to grab it:
 #
@@ -52,41 +54,41 @@ import warnings
 species = ['SO2', 'BC', 'OC', 'NMVOC', 'NOx', 'NH3', 'CO']
 
 # %%
-cams_marco_raw_df = pd.read_csv('../data/slcf_emissions/cams/cams_world.csv')
-cams_marco_raw_df
+cams_raw_df = pd.read_csv('../data/slcf_emissions/cams/cams_world.csv')
+cams_raw_df
 
 # %%
 # Take out agricultural waste burning (in GFED, double counting) and aviation (not complete time series) from Marco's data
-cams_marco_df = pd.DataFrame()
-for specie in species:
-    cams_marco_df[specie] = (
-        cams_marco_raw_df[cams_marco_raw_df['variable'].str.contains(f'|{specie}|', regex=False)].loc[:, '2000':].sum() -
-        cams_marco_raw_df[cams_marco_raw_df['variable']==f'Emissions|{specie}|Agricultural Waste Burning'].loc[:, '2000':].sum() -
-        cams_marco_raw_df[cams_marco_raw_df['variable']==f'Emissions|{specie}|Aviation'].loc[:, '2000':].sum()
-    )
-
-# we know that cams NOx is NO units so put in NO2 units
-cams_marco_df['NOx'] = cams_marco_df['NOx'] * 46.006 / 30.006
-cams_marco_df
-
-# %%
 cams_df = pd.DataFrame()
-species_subs = {specie: specie for specie in species}
-species_subs['NMVOC'] = 'NMV'
-with warnings.catch_warnings():
-    warnings.simplefilter('ignore')
-    emissions_annual = {}
-    for specie in species:
-        emissions_monthly = pd.read_csv(f'../data/slcf_emissions/cams/cams-glob-ant-anthro-{species_subs[specie].lower()}.csv', parse_dates=['Date'])
-
-        cams_df[specie] = (
-            emissions_monthly.groupby(emissions_monthly.Date.dt.year)[' Sum Sectors'].sum() -
-            emissions_monthly.groupby(emissions_monthly.Date.dt.year)[' Agricultural waste burning'].sum()
-        )
+for specie in species:
+    cams_df[specie] = (
+        cams_raw_df[cams_raw_df['variable'].str.contains(f'|{specie}|', regex=False)].loc[:, '2000':].sum() -
+        cams_raw_df[cams_raw_df['variable']==f'Emissions|{specie}|Agricultural Waste Burning'].loc[:, '2000':].sum() -
+        cams_raw_df[cams_raw_df['variable']==f'Emissions|{specie}|Aviation'].loc[:, '2000':].sum()
+    )
 
 # we know that cams NOx is NO units so put in NO2 units
 cams_df['NOx'] = cams_df['NOx'] * 46.006 / 30.006
 cams_df
+
+# %%
+# cams_df = pd.DataFrame()
+# species_subs = {specie: specie for specie in species}
+# species_subs['NMVOC'] = 'NMV'
+# with warnings.catch_warnings():
+#     warnings.simplefilter('ignore')
+#     emissions_annual = {}
+#     for specie in species:
+#         emissions_monthly = pd.read_csv(f'../data/slcf_emissions/cams/cams-glob-ant-anthro-{species_subs[specie].lower()}.csv', parse_dates=['Date'])
+
+#         cams_df[specie] = (
+#             emissions_monthly.groupby(emissions_monthly.Date.dt.year)[' Sum Sectors'].sum() -
+#             emissions_monthly.groupby(emissions_monthly.Date.dt.year)[' Agricultural waste burning'].sum()
+#         )
+
+# # we know that cams NOx is NO units so put in NO2 units
+# cams_df['NOx'] = cams_df['NOx'] * 46.006 / 30.006
+# cams_df
 
 # %%
 ceds_df = pd.DataFrame(columns = species, index=np.arange(2000, 2023, dtype=int))

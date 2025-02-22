@@ -80,6 +80,8 @@ rcmip_specie['NMVOC'] = 'VOC'
 rcmip_specie['SO2'] = 'Sulfur'
 
 # %%
+# here we keep aviation in CEDS, and out of CAMS, but this assumes that aviation scales with other sectors
+# it is a small fraction of the total, so is not an assumption that will cause big problems
 cams_df.loc[2023:] / cams_df.loc[2022] * ceds_df.loc[2022]
 
 # %%
