@@ -931,11 +931,11 @@ pl.legend()
 # %% [markdown]
 # ### Stratospheric water vapour
 #
-# Simple scaling with methane concentration. Anchored to be 0.05 W/m2 in 2019.
+# Simple scaling with methane concentration delta. Anchored to be 0.05 W/m2 in 2019.
 
 # %%
-sfh2ostrat = 0.05 / concentrations['CH4'][2019]
-forcing['H2O_stratospheric'] = (concentrations['CH4'] * sfh2ostrat)
+sfh2ostrat = 0.05 / (concentrations['CH4'][2019] - concentrations['CH4'][1750])
+forcing['H2O_stratospheric'] = ((concentrations['CH4'] - concentrations['CH4'][1750]) * sfh2ostrat)
 
 # %%
 forcing['H2O_stratospheric']

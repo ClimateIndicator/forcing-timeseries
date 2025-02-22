@@ -17,7 +17,7 @@
 #
 # Fossil and industrial from CEDS (1750-2022), from CEDS v2024.07.08, available at https://doi.org/10.5281/zenodo.12803197
 #
-# Extend with CAMS for 2023 and 2024 based on CAMS ratio to 2022 emissions
+# Extend with CAMS for 2023 and 2024 based on CAMS ratio to 2022 emissions. For the fairest comparison, exclude aviation from CEDS when doing the scaling. **May also be some other sectoral mismatches we're not aware of - should probably keep in touch with Lara on this**
 #
 # Biomass burning from GFED (1997-2023), extended backwards to 1750 using BB4CMIP **TODO: replace with the CMIP7 pipeline**, which is part of the CMIP6 database and taken here from RCMIP. We need to convert the unit of NOx emissions from biomass to NO2 from the RCMIP data, as GFED reports in units of NO.
 
@@ -35,15 +35,23 @@ species = ['BC', 'OC', 'SO2', 'NOx', 'CO', 'NMVOC', 'NH3']
 # %%
 slcf_df = pd.DataFrame(columns = species, index=np.arange(1750, 2025, dtype=int))
 ceds_df = pd.DataFrame(columns = species, index=np.arange(1750, 2023, dtype=int))
+ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(1750, 2023, dtype=int))
 
 # %%
 for specie in species:
-    ceds_df.loc[:, specie] = 0.001 * pd.read_csv(
+    df_ceds_in = pd.read_csv(
         f'../data/slcf_emissions/ceds/v20240708/{specie}_CEDS_global_emissions_by_sector_v2024_07_08.csv'
-    ).sum()['X1750':].values
+    )
+    total = df_ceds_in.sum()['X1750':].values
+    aviation = df_ceds_in[df_ceds_in['sector'].isin(('1A3ai_International-aviation', '1A3aii_Domestic-aviation'))].sum()['X1750':].values
+    ceds_df.loc[:, specie] = 0.001 * total
+    ceds_no_aviation_df.loc[:, specie] = 0.001 * (total - aviation)
 
 # %%
 ceds_df
+
+# %%
+ceds_no_aviation_df
 
 # %%
 gfed41s_df = pd.read_csv('../output/gfed4.1s_1997-2024.csv', index_col=0)
@@ -72,6 +80,8 @@ rcmip_specie['NMVOC'] = 'VOC'
 rcmip_specie['SO2'] = 'Sulfur'
 
 # %%
+# here we keep aviation in CEDS, and out of CAMS, but this assumes that aviation scales with other sectors
+# it is a small fraction of the total, so is not an assumption that will cause big problems
 cams_df.loc[2023:] / cams_df.loc[2022] * ceds_df.loc[2022]
 
 # %%
