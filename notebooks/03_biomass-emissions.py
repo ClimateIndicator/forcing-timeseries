@@ -15,11 +15,7 @@
 # %% [markdown]
 # # Download and process biomass burning emissions
 #
-# **note: as of 2025-02-12, the 2024 beta does not yet exist**
-#
-# Also, the hashes of the 2017-2022 "beta" files have changed on 2023-09-18, which means the data may also have changed.
-#
-# Make an extrapolation based on last five year average
+# Note the 2024 emissions file is preliminary and not in the public domain. This is courtesy of Guido van der Werf.
 
 # %%
 import os
@@ -58,7 +54,7 @@ hashes = {
  2020: '83b0ba1f5080cd2d19265c05e0c66f9563ad085381541f8c75d31e69ae839b99',
  2021: '5bf68b48515b04fe0dbb493c9b2b6e564a5b206da4af499ef5492e4d835516c5',
  2022: '46d1e90287c0c012eb1dbb8b7aa2d0c90bfb617b5c708da3c5a8ffa26ca22abb',
- 2023: 'a9c90c311080e3bd2671322369e38d71a478a518777abbea17d2430fb73424ea'
+ 2023: 'a9c90c311080e3bd2671322369e38d71a478a518777abbea17d2430fb73424ea',
 }
 
 files = {}
@@ -72,6 +68,9 @@ for year in range(2017, 2024):
         f"https://www.geo.vu.nl/~gwerf/GFED/GFED4/GFED4.1s_{year}_beta.hdf5",
         None
     )
+
+# offline 2024 from Guido
+files[2024] = "../data/slcf_emissions/gfed/GFED4.1s_2024_beta.hdf5"
 
 files['emissions_factors'] = pooch.retrieve(
     "https://www.geo.vu.nl/~gwerf/GFED/GFED4/ancill/GFED4_Emission_Factors.txt",
@@ -88,17 +87,8 @@ sources=list(efs.columns)
 species=list(efs.index)
 
 months       = '01','02','03','04','05','06','07','08','09','10','11','12'
-
-# in this example we will calculate annual CO emissions for the 14 GFED
-# basisregions over 1997-2014. Please adjust the code to calculate emissions
-# for your own specie, region, and time period of interest. Please
-# first download the GFED4.1s files and the GFED4_Emission_Factors.txt
-# to your computer and adjust the directory where you placed them below
-
-
-# we are interested in CO for this example (4th row):
 start_year = 1997
-end_year   = 2023
+end_year   = 2024
 
 
 """
@@ -141,12 +131,6 @@ table = table / 1E12
 species=list(efs.index)
 gfed41s_df = pd.DataFrame(table.T, index=range(start_year, end_year+1), columns=species)
 gfed41s_df['NMVOC'] = gfed41s_df.loc[:,'C2H6':'C3H6O'].sum(axis=1) + gfed41s_df.loc[:,'C2H6S':].sum(axis=1)
-
-# %%
-gfed41s_df
-
-# %%
-gfed41s_df.loc[2024, :] = gfed41s_df.loc[2019:2023, :].mean(axis=0)
 
 # %%
 gfed41s_df
