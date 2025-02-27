@@ -19,7 +19,7 @@
 #
 # Extend with CAMS for 2023 and 2024 based on CAMS ratio to 2022 emissions. For the fairest comparison, exclude aviation from CEDS when doing the scaling. **May also be some other sectoral mismatches we're not aware of - should probably keep in touch with Lara on this**
 #
-# Biomass burning from GFED (1997-2023), extended backwards to 1750 using BB4CMIP **TODO: replace with the CMIP7 pipeline**, which is part of the CMIP6 database and taken here from RCMIP. We need to convert the unit of NOx emissions from biomass to NO2 from the RCMIP data, as GFED reports in units of NO.
+# Biomass burning from GFED (1997-2024), extended backwards to 1750 using BB4CMIP **TODO: replace with the CMIP7 pipeline**, which is part of the CMIP6 database and taken here from RCMIP. We need to convert the unit of NOx emissions from biomass to NO2 from the RCMIP data, as GFED reports in units of NO.
 
 # %%
 import os
