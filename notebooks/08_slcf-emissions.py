@@ -34,13 +34,13 @@ species = ['BC', 'OC', 'SO2', 'NOx', 'CO', 'NMVOC', 'NH3']
 
 # %%
 slcf_df = pd.DataFrame(columns = species, index=np.arange(1750, 2025, dtype=int))
-ceds_df = pd.DataFrame(columns = species, index=np.arange(1750, 2023, dtype=int))
-ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(1750, 2023, dtype=int))
+ceds_df = pd.DataFrame(columns = species, index=np.arange(1750, 2024, dtype=int))
+ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(1750, 2024, dtype=int))
 
 # %%
 for specie in species:
     df_ceds_in = pd.read_csv(
-        f'../data/slcf_emissions/ceds/v20240708/{specie}_CEDS_global_emissions_by_sector_v2024_07_08.csv'
+        f'../data/slcf_emissions/ceds/v20250311/{specie}_CEDS_global_emissions_by_sector_v_2025_03_11.csv'
     )
     total = df_ceds_in.sum()['X1750':].values
     aviation = df_ceds_in[df_ceds_in['sector'].isin(('1A3ai_International-aviation', '1A3aii_Domestic-aviation'))].sum()['X1750':].values
@@ -118,9 +118,9 @@ for specie in species:
         gfed41s_df.loc[1997:2022, specie].values.squeeze() * gfed_convert[specie]
     )
 
-    # assume ratio for 2023 and 2024 in CEDS based on 2022 in CAMS
+    # assume emissions for 2024 in CEDS based on 2023 CEDS/CAMS ratio applied to 2024 in CAMS
     slcf_df.loc[2023:2024, specie] = (
-        cams_df.loc[2023:2024, specie] / cams_df.loc[2022, specie] * ceds_df.loc[2022, specie] + 
+        cams_df.loc[2023:2024, specie] / cams_df.loc[2023, specie] * ceds_df.loc[2023, specie] + 
         gfed41s_df.loc[2023:2024, specie] * gfed_convert[specie]
     )
 

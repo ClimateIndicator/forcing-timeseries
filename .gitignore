@@ -9,6 +9,7 @@ data/volcanic_aod
 data/contrails/OIWORLD*
 data/mls
 data/slcf_emissions/cams/*.nc
+data/slcf_emissions/ceds/v20250311
 data/slcf_emissions/merra
 data/era5
 data/slcf_emissions/gfed/*.hdf5
