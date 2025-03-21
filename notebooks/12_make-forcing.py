@@ -448,7 +448,11 @@ erfari_re_samples = erfari_re_samples.to_numpy()
 
 # %%
 # a future TODO is to split CO out from the NMVOC estimate
-emnump = emissions.drop(columns=['CO']).to_numpy()
+# then CH4 and N2O is produced only for the time series to bang into the emissions harmonization so drop them too
+emnump = emissions.drop(columns=['CO', 'CH4', 'N2O']).to_numpy()
+
+# %%
+emissions
 
 # %%
 forcing_ensemble['aerosol-radiation_interactions'] = np.zeros((275, SAMPLES))

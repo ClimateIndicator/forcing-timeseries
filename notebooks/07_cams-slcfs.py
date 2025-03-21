@@ -30,11 +30,11 @@
 #
 # From this comparison, we see that there is still quite a lot of disagreement between the datasets; but we use CAMS to extend CEDS by taking the ratio of CAMS in 2024 to 2023.
 #
-# **CEDS 2023 is available but not public; it is used here, but the raw data is not available**
+# **CEDS 2023 is now available and public-ish: the data is from Steve Smith's dropbox; Zenodo DOI will be forthcoming**
 #
-# I'm using the processed data from ScenarioMIP prepared by Marco Gambarini (the totals are basically identical to doing the following steps, but Marco has retained the sectoral detail). Marco adds aviation in, so I take it back out.
+# I'm using the processed data from ScenarioMIP prepared by Marco Gambarini (the totals are basically identical to doing the following steps, but Marco has retained the sectoral detail). Marco adds aviation in, so I take it back out. This file is processed by the IIASA Emissions Historical time series at
 #
-# This file is processed by the IIASA Emissions Historical time series at https://github.com/iiasa/emissions_harmonization_historical/blob/main/notebooks/0110_CAMS.py
+# https://github.com/iiasa/emissions_harmonization_historical/blob/main/notebooks/0150_CAMS.py
 #
 # Unfortunately there doesn't seem to be a way to automate downloads of CAMS data, so if you want to grab it:
 #
@@ -51,10 +51,10 @@ import matplotlib.pyplot as pl
 import warnings
 
 # %%
-species = ['SO2', 'BC', 'OC', 'NMVOC', 'NOx', 'NH3', 'CO']
+species = ['SO2', 'BC', 'OC', 'NMVOC', 'NOx', 'NH3', 'CO', 'CH4', 'N2O']
 
 # %%
-cams_raw_df = pd.read_csv('../data/slcf_emissions/cams/cams_world.csv')
+cams_raw_df = pd.read_csv('../data/slcf_emissions/cams/cams_world_0010.csv')
 cams_raw_df
 
 # %%
@@ -96,7 +96,7 @@ ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(2000, 2024
 
 for specie in species:
     df_ceds_in = pd.read_csv(
-        f'../data/slcf_emissions/ceds/v20250311/{specie}_CEDS_global_emissions_by_sector_v_2025_03_11.csv'
+        f'../data/slcf_emissions/ceds/v20250318/{specie}_CEDS_global_emissions_by_sector_v_2025_03_18.csv'
     )
     total = df_ceds_in.sum()['X2000':].values
     aviation = df_ceds_in[df_ceds_in['sector'].isin(('1A3ai_International-aviation', '1A3aii_Domestic-aviation'))].sum()['X2000':].values
@@ -110,10 +110,10 @@ ceds_df
 ceds_no_aviation_df
 
 # %%
-fig, ax = pl.subplots(2, 4, figsize=(12, 6))
+fig, ax = pl.subplots(3, 3, figsize=(9, 9))
 for ispec, specie in enumerate(species):
-    irow = ispec // 4
-    icol = ispec % 4
+    irow = ispec // 3
+    icol = ispec % 3
 #    ax[irow,icol].plot(np.arange(2000, 2026), cams_df.loc[:, specie], label='CAMS')
     ax[irow,icol].plot(np.arange(2000, 2026), cams_df.loc[:, specie], label="CAMS (excl. AIR & AWB)")
     # ax[irow,icol].plot(np.arange(2000, 2023), ceds_df.loc[:, specie], label='CEDS')
