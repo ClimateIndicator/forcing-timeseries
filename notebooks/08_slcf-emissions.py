@@ -30,22 +30,25 @@ import h5py
 import matplotlib.pyplot as pl
 
 # %%
-species = ['BC', 'OC', 'SO2', 'NOx', 'CO', 'NMVOC', 'NH3']
+species = ['BC', 'OC', 'SO2', 'NOx', 'CO', 'NMVOC', 'NH3', 'CH4', 'N2O']
 
 # %%
 slcf_df = pd.DataFrame(columns = species, index=np.arange(1750, 2025, dtype=int))
-ceds_df = pd.DataFrame(columns = species, index=np.arange(1750, 2023, dtype=int))
-ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(1750, 2023, dtype=int))
+ceds_df = pd.DataFrame(columns = species, index=np.arange(1750, 2024, dtype=int))
+ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(1750, 2024, dtype=int))
 
 # %%
+first_ceds_year = {specie: 1750 for specie in species}
+first_ceds_year['CH4'] = 1970
+first_ceds_year['N2O'] = 1970
 for specie in species:
     df_ceds_in = pd.read_csv(
-        f'../data/slcf_emissions/ceds/v20240708/{specie}_CEDS_global_emissions_by_sector_v2024_07_08.csv'
+        f'../data/slcf_emissions/ceds/v20250318/{specie}_CEDS_global_emissions_by_sector_v_2025_03_18.csv'
     )
-    total = df_ceds_in.sum()['X1750':].values
-    aviation = df_ceds_in[df_ceds_in['sector'].isin(('1A3ai_International-aviation', '1A3aii_Domestic-aviation'))].sum()['X1750':].values
-    ceds_df.loc[:, specie] = 0.001 * total
-    ceds_no_aviation_df.loc[:, specie] = 0.001 * (total - aviation)
+    total = df_ceds_in.sum()[f'X{first_ceds_year[specie]}':].values
+    aviation = df_ceds_in[df_ceds_in['sector'].isin(('1A3ai_International-aviation', '1A3aii_Domestic-aviation'))].sum()[f'X{first_ceds_year[specie]}':].values
+    ceds_df.loc[first_ceds_year[specie]:, specie] = 0.001 * total
+    ceds_no_aviation_df.loc[first_ceds_year[specie]:, specie] = 0.001 * (total - aviation)
 
 # %%
 ceds_df
@@ -85,7 +88,7 @@ rcmip_specie['SO2'] = 'Sulfur'
 cams_df.loc[2023:] / cams_df.loc[2022] * ceds_df.loc[2022]
 
 # %%
-gfed41s_df.loc[2023:2024, specie] * gfed_convert[specie]
+gfed41s_df.loc[2024, specie] * gfed_convert[specie]
 
 # %%
 for specie in species:
@@ -103,9 +106,9 @@ for specie in species:
     ]
     
     
-    slcf_df.loc[1750:1996, specie] = (
-        ceds_df.loc[1750:1996, specie] + (
-            rcmip_df.loc[rcmip_df['Variable'].isin(uva_rcmip), '1750':'1996']
+    slcf_df.loc[first_ceds_year[specie]:1996, specie] = (
+        ceds_df.loc[first_ceds_year[specie]:1996, specie] + (
+            rcmip_df.loc[rcmip_df['Variable'].isin(uva_rcmip), f'{first_ceds_year[specie]}':'1996']
             .interpolate(axis=1)
             .sum()
             .values.
@@ -113,22 +116,22 @@ for specie in species:
         )
     )
 
-    slcf_df.loc[1997:2022, specie] = (
-        ceds_df.loc[1997:2022, specie] +
-        gfed41s_df.loc[1997:2022, specie].values.squeeze() * gfed_convert[specie]
+    slcf_df.loc[1997:2023, specie] = (
+        ceds_df.loc[1997:2023, specie] +
+        gfed41s_df.loc[1997:2023, specie].values.squeeze() * gfed_convert[specie]
     )
 
-    # assume ratio for 2023 and 2024 in CEDS based on 2022 in CAMS
-    slcf_df.loc[2023:2024, specie] = (
-        cams_df.loc[2023:2024, specie] / cams_df.loc[2022, specie] * ceds_df.loc[2022, specie] + 
-        gfed41s_df.loc[2023:2024, specie] * gfed_convert[specie]
+    # assume emissions for 2024 in CEDS based on 2023 CEDS/CAMS ratio applied to 2024 in CAMS
+    slcf_df.loc[2024, specie] = (
+        cams_df.loc[2024, specie] / cams_df.loc[2023, specie] * ceds_df.loc[2023, specie] + 
+        gfed41s_df.loc[2024, specie] * gfed_convert[specie]
     )
 
 # %%
-fig, ax = pl.subplots(2, 4, figsize=(12, 6))
+fig, ax = pl.subplots(3, 3, figsize=(9, 9))
 for ispec, specie in enumerate(species):
-    irow = ispec // 4
-    icol = ispec % 4
+    irow = ispec // 3
+    icol = ispec % 3
     ax[irow,icol].plot(slcf_df.loc[2000:2024, specie])
     ax[irow,icol].set_title(specie)
 
