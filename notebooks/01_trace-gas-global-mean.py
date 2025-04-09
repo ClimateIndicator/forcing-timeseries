@@ -42,7 +42,9 @@
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt
 #
-# One final update is to update 2023 to incorporate CSIRO measurements for CO2, CH4 and N2O. These values from Brad.
+# Then:
+# - CSIRO for CO2, CH4 and N2O. These values come from Paul Krummel. (We comment on CSIRO in the paper but don't use them in the assessment - is this an IPCC decision?)
+# - AGAGE "horse's mouth" figures from Jens Muhle; CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-125 and N2O
 
 # %%
 import os
@@ -158,9 +160,20 @@ df_update
 df_ch4_noaa.loc[1984:2023, 'mean']
 
 # %%
+# this comes from Jens Muhle
+df_agage_recent = pd.read_csv(
+    '../data/ghg_concentrations/ar6_updated/agage_2019-2024.csv',
+    index_col=0
+)
+
+# %%
+df_agage_recent
+
+# %%
 # difference between NOAA and NOAA/AGAGE is small
 # last two ranges typically year of assessment minus one
 pd.concat((df_conc.loc[1984:2019, 'CH4'], df_update.loc[2020:2023, 'CH4']), axis=0) - df_ch4_noaa.loc[1984:2023, 'mean']
+#df_ch4_noaa.loc[1984:2023, 'mean']
 
 # %%
 # end is year of assessment minus one
@@ -185,9 +198,15 @@ df_conc.loc[1750:1978, 'CO2'] = df_conc.loc[1750:1978, 'CO2'] * 1.00079 - 0.142
 
 df_conc.loc[1979:2024, 'CO2'] = df_co2.loc[1979:2024, 'mean']
 
-# For methane and N2O, the calibration scales have not changed, and we use multiple datasets, so continue with 2023 Indicators estimate and
-# adjust 2023 NOAA-only value for the average of the differences between 2023 Indicators and NOAA
-df_conc.loc[2020:2023, 'CH4':'N2O'] = df_update.loc[2020:2023, 'CH4':'N2O']
+# For methane and N2O, the calibration scales have not changed, and we use multiple datasets. 2024 is available for AGAGE and not NOAA, so
+# take the mean difference between the datasets as an offset applied to 2024.
+df_conc.loc[2020:2023, 'CH4'] = np.mean((df_ch4_noaa.loc[2020:2023, 'mean'], df_agage_recent.loc[2020:2023, 'CH4']), axis=0)
+offset = np.mean((df_ch4_noaa.loc[2020:2023, 'mean'] - df_agage_recent.loc[2020:2023, 'CH4']))
+df_conc.loc[2024, 'CH4'] = df_agage_recent.loc[2024, 'CH4'] + offset
+
+df_conc.loc[2020:2023, 'N2O'] = np.mean((df_n2o_noaa.loc[2020:2023, 'mean'], df_agage_recent.loc[2020:2023, 'N2O']), axis=0)
+offset = np.mean((df_n2o_noaa.loc[2020:2023, 'mean'] - df_agage_recent.loc[2020:2023, 'N2O']))
+df_conc.loc[2024, 'N2O'] = df_agage_recent.loc[2024, 'N2O'] + offset
 
 # %%
 df_conc.columns
@@ -202,7 +221,7 @@ df_update.rename(columns={'H-1301': 'Halon-1301'}, inplace=True)
 df_update.rename(columns={'H-1202': 'Halon-1202'}, inplace=True)
 
 # %%
-# now let's incorporate Brad and Lindsay's new data
+# now let's incorporate Brad and Lindsay's data from 2023
 for species in df_update.columns:
     if species in ['Halon-1202']:
         continue
@@ -210,8 +229,13 @@ for species in df_update.columns:
     
     
 #df_conc.loc[2024, 'CO2'] = 422.6
-df_conc.loc[2024, 'CH4'] = 1930.9
-df_conc.loc[2024, 'N2O'] = 337.8
+#df_conc.loc[2024, 'CH4'] = 1930.9
+#df_conc.loc[2024, 'N2O'] = 337.8
+
+# %%
+# add in AGAGE from 2024 where we have them
+for species in ["CCl4", "CFC-11", "CFC-12", "HCFC-22", "HFC-125", "HFC-134a"]:
+    df_conc.loc[2024, species] = df_agage_recent.loc[2024, species]
 
 # %%
 df_conc
@@ -241,7 +265,7 @@ df_agage_md
 
 # %%
 df_conc.loc[1850:1989, 'i-C6F14'] = 0
-df_conc.loc[1990:2015, 'i-C6F14'].interpolate(inplace=True)
+df_conc.loc[1990:2015, 'i-C6F14'] = df_conc.loc[1990:2015, 'i-C6F14'].interpolate()#(inplace=True)
 
 # %%
 df_conc.loc[1850:1977, 'CFC-112'] = 0
@@ -284,7 +308,7 @@ for col in df_conc.columns:
     x = df_conc[pd.isnull(df_conc[col])].index.astype(float).values
     print(col, x)
     # Extrapolate those points with the fitted function
-    df_conc[col][x] = linear(x, *col_params[col])
+    df_conc.loc[x, col] = linear(x, *col_params[col])
 
 # %%
 df_conc
