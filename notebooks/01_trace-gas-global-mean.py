@@ -19,6 +19,8 @@
 #
 # **update Feb 2025: preliminary 2024 values from Lindsay in the paper draft, use these here for WMO analysis**
 #
+# **update Apr 2025: 2024 NOAA CO2 value now available**
+#
 # IPCC AR6 methodology:
 #
 # The following description comes from the Excel sheet of long-lived greenhouse gas concentrations, v9. See https://github.com/chrisroadmap/ar6/blob/main/data_input/observations/LLGHG_history_AR6_v9_for_archive.xlsx
@@ -29,14 +31,14 @@
 #
 # https://gml.noaa.gov/aftp/data/ is usually a good place to look
 #
-# NOAA (accessed 2025-02-12):
+# NOAA (accessed 2025-04-09):
 # - https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/n2o/n2o_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/sf6/sf6_annmean_gl.txt
 # - https://gml.noaa.gov/aftp/data/hats/Total_Cl_Br/2024%20update%20total%20Cl%20Br%20&%20F.xls  (converted to CSV with header and footer rows stripped out; save as noaa_**YYYY**_global_mean_mixing_ratios.csv) **note: each year, check the FTP directory to see if there has been an annual update**
 #
-# AGAGE (accessed 2025-02-12):
+# AGAGE (accessed 2025-02-12, no update as of April):
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt
 #
@@ -181,7 +183,7 @@ pd.concat((df_conc.loc[2001:2019, 'N2O'], df_update.loc[2020:2023, 'N2O']), axis
 # X2019 = 1.00079*X2007 - 0.142 (from Brad)
 df_conc.loc[1750:1978, 'CO2'] = df_conc.loc[1750:1978, 'CO2'] * 1.00079 - 0.142
 
-df_conc.loc[1979:2023, 'CO2'] = df_co2.loc[1979:2023, 'mean']
+df_conc.loc[1979:2024, 'CO2'] = df_co2.loc[1979:2024, 'mean']
 
 # For methane and N2O, the calibration scales have not changed, and we use multiple datasets, so continue with 2023 Indicators estimate and
 # adjust 2023 NOAA-only value for the average of the differences between 2023 Indicators and NOAA
@@ -207,7 +209,7 @@ for species in df_update.columns:
     df_conc.loc[2019:2023, species] = df_update.loc[2019:2023, species]
     
     
-df_conc.loc[2024, 'CO2'] = 422.6
+#df_conc.loc[2024, 'CO2'] = 422.6
 df_conc.loc[2024, 'CH4'] = 1930.9
 df_conc.loc[2024, 'N2O'] = 337.8
 
