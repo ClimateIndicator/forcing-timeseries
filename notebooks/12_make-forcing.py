@@ -757,7 +757,7 @@ forcing['CO2'][0]
 
 # %%
 # get temperature time series, needed to back out temperature feedback
-temp_obs = pd.read_csv('../data/gmst/IGCC_GMST_1850-2023.csv', index_col=0).values
+temp_obs = pd.read_csv('../data/gmst/IGCC_GMST_1850-2024.csv', index_col=0).values
 delta_gmst = [
     0,
     temp_obs[65:76].mean(),
