@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -19,7 +19,7 @@
 #
 # **update Feb 2025: preliminary 2024 values from Lindsay in the paper draft, use these here for WMO analysis**
 #
-# **update Apr 2025: 2024 NOAA CO2 value now available**
+# **update Apr 2025: 2024 NOAA CO2 value now available, additional dataset for some minor GHGs from NOAA and AGAGE**
 #
 # IPCC AR6 methodology:
 #
@@ -43,11 +43,13 @@
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt
 #
 # Then:
-# - CSIRO for CO2, CH4 and N2O. These values come from Paul Krummel. (We comment on CSIRO in the paper but don't use them in the assessment - is this an IPCC decision?)
+# - CSIRO for CO2, CH4 and N2O. These values come from Paul Krummel. (We comment on CSIRO in the paper but don't use them in the assessment)
 # - AGAGE "horse's mouth" figures from Jens Muhle; CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-125 and N2O
 
 # %%
 import os
+import warnings
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as pl
@@ -88,24 +90,21 @@ df_noaa = pd.read_csv(
     '../data/ghg_concentrations/noaa_gml/noaa_2024_global_mean_mixing_ratios.csv'
 )
 
-# %%
+df_noaa
+df_noaa.drop(columns=["Unnamed: 20", "in ppt", "Unnamed: 22", "in ppt.1", "Unnamed: 24", "in ppt.2"], inplace=True)
 df_noaa
 
-# %%
-df_noaa.loc[162:167,'CFC-12']
-
-# %%
 df_noaa[df_noaa=="ND"]=np.nan
 
-# %%
 df_noaa = df_noaa.rolling(6, center=True).mean()
-df_noaa['YYYY'] = df_noaa.date-0.5
+df_noaa['YYYY'] = (df_noaa.date-0.5)
 df_noaa.drop(df_noaa.tail(2).index,inplace=True)
 df_noaa.drop(df_noaa.head(3).index,inplace=True)
 df_noaa.set_index('YYYY', inplace=True)
 df_noaa.drop(columns=['date'], inplace=True)
 df_noaa.rename(columns={'H2402': 'H-2402'}, inplace=True)
 df_noaa = df_noaa[df_noaa.index % 1 == 0]
+df_noaa.index = df_noaa.index.astype(int)
 df_noaa
 
 # %%
@@ -124,6 +123,7 @@ df_agage_ms = df_agage_ms.rolling(12, center=True).mean().drop([col for col in d
 df_agage_ms.drop(columns='MM', inplace=True)
 df_agage_ms.set_index('YYYY', inplace=True)
 df_agage_ms = df_agage_ms[df_agage_ms.index % 1 == 0]
+df_agage_ms.index = df_agage_ms.index.astype(int)
 
 # %%
 df_agage_ms[df_agage_ms.index % 1 == 0]
@@ -143,10 +143,13 @@ df_conc.loc[2023, :] = np.nan
 df_conc.loc[2024, :] = np.nan
 
 # %%
+df_conc.tail(11)
+
+# %%
 df_co2
 
 # %%
-# this comes from Brad and Lindsay
+# this comes from Brad and Lindsay and was used directly in IGCC2023
 df_update = pd.read_csv(
     '../data/ghg_concentrations/ar6_updated/update_2019-2023.csv',
     index_col=0
@@ -160,9 +163,9 @@ df_update
 df_ch4_noaa.loc[1984:2023, 'mean']
 
 # %%
-# this comes from Jens Muhle
+# this comes from Jens Muhle for IGCC2024
 df_agage_recent = pd.read_csv(
-    '../data/ghg_concentrations/ar6_updated/agage_2019-2024.csv',
+    '../data/ghg_concentrations/agage/agage_2019-2024.csv',
     index_col=0
 )
 
@@ -170,49 +173,193 @@ df_agage_recent = pd.read_csv(
 df_agage_recent
 
 # %%
-# difference between NOAA and NOAA/AGAGE is small
-# last two ranges typically year of assessment minus one
-pd.concat((df_conc.loc[1984:2019, 'CH4'], df_update.loc[2020:2023, 'CH4']), axis=0) - df_ch4_noaa.loc[1984:2023, 'mean']
-#df_ch4_noaa.loc[1984:2023, 'mean']
+# this comes from Lindsay Lan for IGCC2024
+
+# for CO2, preference is given to the GML data online as it is more recently updated and given to two decimal places.
+# for other gases, use this dataset.
+df_noaa_update = pd.read_excel(
+    '../data/ghg_concentrations/noaa_gml/NOAA_Annual_Mean_MoleFractions_with2024.xlsx',
+    skiprows=2,
+    skipfooter=5,
+    index_col=0
+)
+df_noaa_update.drop(index=np.nan, inplace=True)
+df_noaa_update.index = (df_noaa_update.index-0.5).astype(int)  # the index provided by Lindsay is correct but we want to be consistent across datasets
+df_noaa_update[df_noaa_update=="nd"]=np.nan
+df_noaa_update.rename(columns={'H2402': 'H-2402'}, inplace=True)
+df_noaa_update
 
 # %%
-# end is year of assessment minus one
-df_n2o_noaa.loc[2001:2023, 'mean']
-
-# %%
-# For N2O it's a bit bigger. Lindsay recommends scaling NOAA up by 1.0007
-# again typically assessment year minus one
-pd.concat((df_conc.loc[2001:2019, 'N2O'], df_update.loc[2020:2023, 'N2O']), axis=0) - df_n2o_noaa.loc[2001:2023, 'mean']
-
-# %%
-# as above
-pd.concat((df_conc.loc[2001:2019, 'N2O'], df_update.loc[2020:2023, 'N2O']), axis=0) - 1.0007 * df_n2o_noaa.loc[2001:2023, 'mean']
-
-# %%
-# I do think that CH4 and N2O should include AGAGE
-
+# decision tree
+# CO2 is NOAA only, from GML (higher precision and newer than Lindsay's file)
 # CO2: this is on X2019 scale. Meinshausen et al (2017) is the source of pre-1980 data in AR6. 
 # Meinshausen data should be adjusted for the X2019 scale.
 # X2019 = 1.00079*X2007 - 0.142 (from Brad)
 df_conc.loc[1750:1978, 'CO2'] = df_conc.loc[1750:1978, 'CO2'] * 1.00079 - 0.142
-
 df_conc.loc[1979:2024, 'CO2'] = df_co2.loc[1979:2024, 'mean']
 
-# For methane and N2O, the calibration scales have not changed, and we use multiple datasets. 2024 is available for AGAGE and not NOAA, so
-# take the mean difference between the datasets as an offset applied to 2024.
-df_conc.loc[2020:2023, 'CH4'] = np.mean((df_ch4_noaa.loc[2020:2023, 'mean'], df_agage_recent.loc[2020:2023, 'CH4']), axis=0)
-offset = np.mean((df_ch4_noaa.loc[2020:2023, 'mean'] - df_agage_recent.loc[2020:2023, 'CH4']))
-df_conc.loc[2024, 'CH4'] = df_agage_recent.loc[2024, 'CH4'] + offset
+# CH4 and N2O is average of NOAA (Lindsay's file) and AGAGE
+# same for CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-125, HFC-134a
+# For methane and N2O, the calibration scales have not changed, and we use multiple datasets.
+# since we don't have the AGAGE data here before 2019, take the average of NOAA and AGAGE from 2019 onwards and keep pre-2019 from IPCC
+for gas in ['CCl4', 'CFC-11', 'CFC-12', 'CH4', 'HCFC-22', 'HFC-125', 'HFC-134a', 'N2O']:
+    df_conc.loc[2019:2024, gas] = np.mean((df_noaa_update.loc[2019:2024, gas], df_agage_recent.loc[2019:2024, gas]), axis=0).astype(float)
 
-df_conc.loc[2020:2023, 'N2O'] = np.mean((df_n2o_noaa.loc[2020:2023, 'mean'], df_agage_recent.loc[2020:2023, 'N2O']), axis=0)
-offset = np.mean((df_n2o_noaa.loc[2020:2023, 'mean'] - df_agage_recent.loc[2020:2023, 'N2O']))
-df_conc.loc[2024, 'N2O'] = df_agage_recent.loc[2024, 'N2O'] + offset
+# %%
+[col for col in df_noaa_update.columns if col in df_agage_ms.columns]
+
+# %%
+df_noaa_update.rename(columns={'H-2402': 'Halon-2402'}, inplace=True)
+df_noaa_update.rename(columns={'H-1211': 'Halon-1211'}, inplace=True)
+df_noaa_update.rename(columns={'H-1301': 'Halon-1301'}, inplace=True)
+
+# %%
+df_noaa.rename(columns={'H-2402': 'Halon-2402'}, inplace=True)
+df_noaa.rename(columns={'H-1211': 'Halon-1211'}, inplace=True)
+df_noaa.rename(columns={'H-1301': 'Halon-1301'}, inplace=True)
+
+# %%
+df_agage_ms.rename(columns={'H-2402': 'Halon-2402'}, inplace=True)
+df_agage_ms.rename(columns={'H-1211': 'Halon-1211'}, inplace=True)
+df_agage_ms.rename(columns={'H-1301': 'Halon-1301'}, inplace=True)
+
+# %%
+fig, ax = pl.subplots(4,4, figsize=(16, 16))
+for igas, gas in enumerate(['HCFC-22', 'CFC-113', 'HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
+    'HFC-152a','HFC-143a', 'HFC-365mfc', 'HFC-227ea', 'HFC-23', 'SF6']):
+    i = igas//4
+    j = igas%4
+    ax[i,j].plot(df_conc[gas])
+    ax[i,j].plot(df_noaa_update[gas])
+    ax[i,j].plot(df_agage_ms[gas])
+    ax[i,j].set_title(gas)
+    ax[i,j].set_xlim(1980, 2025)
+
+# %%
+# remove unreliable data
+df_agage_ms.loc[2004:2007,'HFC-23'] = np.nan
+df_agage_ms.loc[2018:,'CFC-113'] = np.nan
+df_agage_ms.loc[2004:2005,'HFC-365mfc'] = np.nan
+df_agage_ms.loc[2004:2006,'HFC-227ea'] = np.nan
+df_noaa_update.loc[:2006, 'HFC-227ea'] = np.nan
+
+# %%
+# replot with questionable data removed
+fig, ax = pl.subplots(4,4, figsize=(16, 16))
+for igas, gas in enumerate(['HCFC-22', 'CFC-113', 'HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
+    'HFC-152a','HFC-143a', 'HFC-365mfc', 'HFC-227ea', 'HFC-23', 'SF6']):
+    i = igas//4
+    j = igas%4
+    ax[i,j].plot(df_conc[gas])
+    ax[i,j].plot(df_noaa_update[gas])
+    ax[i,j].plot(df_agage_ms[gas])
+    ax[i,j].set_title(gas)
+    ax[i,j].set_xlim(1980, 2025)
+
+# %%
+# make a combined timeseries which is the mean of NOAA and AGAGE in 2020, 2021 and 2022, and
+# NOAA 2023 and 2024 is offset with the mean of NOAA and AGAGE in all overlapping years
+
+# turn off pandas warnings - why is pandas so fragile? why do they keep changing stuff?!
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    for gas in ['HCFC-22', 'HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
+        'HFC-152a','HFC-143a', 'HFC-365mfc', 'HFC-227ea', 'HFC-23', 'SF6']:
+        two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_ms[gas])).mean().values[0]
+        df_conc.loc[2020:2022, gas] = pd.DataFrame((df_noaa_update.loc[2020:2022, gas], df_agage_ms.loc[2020:2022, gas])).mean()
+        df_conc.loc[2023:2024, gas] = pd.DataFrame((df_noaa_update.loc[2023:2024, gas]) - two_dataset_mean)
+
+# %%
+# CFC-113 is special case; do the NOAA extrapolation from 2020, and assume the previously given values for 2018 and 2019 are good.
+# we will check this in a new round of plots.
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    gas = 'CFC-113'
+    two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_ms[gas])).mean().values[0]
+    df_conc.loc[2020:2024, gas] = pd.DataFrame((df_noaa_update.loc[2020:2024, gas]) - two_dataset_mean)
+
+# %%
+df_conc.tail(10)
+
+# %%
+# replot highlighting combined extended data
+fig, ax = pl.subplots(4,4, figsize=(16, 16))
+for igas, gas in enumerate(['HCFC-22', 'CFC-113', 'HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
+    'HFC-152a','HFC-143a', 'HFC-365mfc', 'HFC-227ea', 'HFC-23', 'SF6']):
+    i = igas//4
+    j = igas%4
+    ax[i,j].plot(df_conc[gas], lw=3)
+    ax[i,j].plot(df_noaa_update[gas])
+    ax[i,j].plot(df_agage_ms[gas])
+    ax[i,j].set_title(gas)
+    ax[i,j].set_xlim(1980, 2025)
+
+# %%
+# CH3Br and HFC-32 combination of NOAA to 2023 and AGAGE MS
+
+# %%
+fig, ax = pl.subplots(1,2, figsize=(8, 4))
+for igas, gas in enumerate(['CH3Br', 'HFC-32']):
+    ax[igas].plot(df_conc[gas])
+    ax[igas].plot(df_noaa[gas])
+    ax[igas].plot(df_agage_ms[gas])
+    ax[igas].set_title(gas)
+    ax[igas].set_xlim(1980, 2025)
+
+# in the HFC-32 case, take the mean of the overlapping period since the data has diverged a bit from AR6, and use a 
+# trend extrapolation (last step) rather than a mean offset
+
+# %%
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    gas = 'CH3Br'
+    two_dataset_mean = pd.DataFrame((df_noaa[gas] - df_agage_ms[gas])).mean().values[0]
+    df_conc.loc[2020:2022, gas] = pd.DataFrame((df_noaa.loc[2020:2022, gas], df_agage_ms.loc[2020:2022, gas])).mean()
+    df_conc.loc[2023:2023, gas] = pd.DataFrame((df_noaa.loc[2023:2023, gas]) - two_dataset_mean)
+
+    gas = 'HFC-32'
+#    two_dataset_mean = pd.DataFrame((df_noaa[gas] - df_agage_ms[gas])).mean().values[0]
+    df_conc.loc[2004:2022, gas] = pd.DataFrame((df_noaa.loc[2004:2022, gas], df_agage_ms.loc[2004:2022, gas])).mean()
+#    df_conc.loc[2023:2023, gas] = pd.DataFrame((df_noaa.loc[2023:2023, gas]) - two_dataset_mean)
+
+# %%
+fig, ax = pl.subplots(1,2, figsize=(8, 4))
+for igas, gas in enumerate(['CH3Br', 'HFC-32']):
+    ax[igas].plot(df_conc[gas], lw=3)
+    ax[igas].plot(df_noaa[gas])
+    ax[igas].plot(df_agage_ms[gas])
+    ax[igas].set_title(gas)
+    ax[igas].set_xlim(1980, 2025)
+
+# %%
+df_agage_recent.columns
 
 # %%
 df_conc.columns
 
 # %%
+df_noaa.columns
+
+# %%
+df_noaa_update.columns
+
+# %%
 df_update.columns
+
+# %%
+df_agage_ms.columns
+
+# %%
+[col for col in df_noaa.columns if col not in df_noaa_update.columns]
+
+# %%
+df_noaa.tail()
+
+# %%
+df_conc.tail(10)
+
+# %%
+df_agage_ms.columns
 
 # %%
 df_update.rename(columns={'H-2402': 'Halon-2402'}, inplace=True)
@@ -221,47 +368,92 @@ df_update.rename(columns={'H-1301': 'Halon-1301'}, inplace=True)
 df_update.rename(columns={'H-1202': 'Halon-1202'}, inplace=True)
 
 # %%
-# now let's incorporate Brad and Lindsay's data from 2023
-for species in df_update.columns:
-    if species in ['Halon-1202']:
-        continue
-    df_conc.loc[2019:2023, species] = df_update.loc[2019:2023, species]
-    
-    
-#df_conc.loc[2024, 'CO2'] = 422.6
-#df_conc.loc[2024, 'CH4'] = 1930.9
-#df_conc.loc[2024, 'N2O'] = 337.8
+df_agage_ms.rename(columns={'PFC-14': 'CF4'}, inplace=True)
+df_agage_ms.rename(columns={'PFC-116': 'C2F6'}, inplace=True)
+df_agage_ms.rename(columns={'PFC-218': 'C3F8'}, inplace=True)
 
 # %%
-# add in AGAGE from 2024 where we have them
-for species in ["CCl4", "CFC-11", "CFC-12", "HCFC-22", "HFC-125", "HFC-134a"]:
-    df_conc.loc[2024, species] = df_agage_recent.loc[2024, species]
+df_agage_ms.rename(columns={'HFC-4310mee': 'HFC-43-10mee'}, inplace=True)
 
 # %%
-df_conc
+df_conc.columns
 
 # %%
-df_agage_md = pd.read_csv(
-    '../data/ghg_concentrations/agage/global_mean_md.txt', 
-    sep=r'\s+',
-    skiprows=14,
-    index_col=0
-)
+# where AGAGE MS data exists to 2022 but no corresponding value from other datasets, use this, with an offset from the mean overlap.
+fig, ax = pl.subplots(4,4, figsize=(16, 16))
+for igas, gas in enumerate(['HFC-236fa', 'HFC-245fa', 'HFC-43-10mee', 'CH3Cl', 'CH2Cl2', 'CHCl3',
+    'SO2F2', 'NF3', 'CF4', 'C2F6', 'C3F8', 'CFC-13', 'CFC-114', 'CFC-115']):
+    i = igas//4
+    j = igas%4
+    ax[i,j].plot(df_conc[gas])
+    ax[i,j].plot(df_agage_ms[gas])
+    if gas not in ['HFC-43-10mee']:
+        ax[i,j].plot(df_update[gas])
+    ax[i,j].set_title(gas)
+    ax[i,j].set_xlim(1980, 2025)
+
+# replace with AGAGE no offset, all available years :
+# 236fa (after clean), 245fa (after clean), 4310mee (after clean), CH3Cl, SO2F2 (after clean), NF3 (after clean), CF4, C2F6, C3F8, CFC13, CFC115
+
+# extend with AGAGE, no offset
+# CHCl3
+
+# extend with AGAGE, with offset
+# CH2Cl2
+
+# use 2023 update
+# CFC114
 
 # %%
-df_agage_md = df_agage_md.rolling(12, min_periods=12, center=True, step=12).mean().drop([col for col in df_agage_md.columns if '---' in col],axis=1)
-df_agage_md.drop(columns='MM', inplace=True)
-df_agage_md.set_index('YYYY', inplace=True)
-df_agage_md.drop(index=np.nan, inplace=True)
+df_conc.loc[2007:2022, 'HFC-236fa'] = df_agage_ms.loc[2007:2022, 'HFC-236fa']
+df_conc.loc[2007:2022, 'HFC-245fa'] = df_agage_ms.loc[2007:2022, 'HFC-245fa']
+df_conc.loc[2011:2022, 'HFC-43-10mee'] = df_agage_ms.loc[2011:2022, 'HFC-43-10mee']
+df_conc.loc[2005:2022, 'SO2F2'] = df_agage_ms.loc[:, 'SO2F2']
+df_conc.loc[2015:2022, 'NF3'] = df_agage_ms.loc[2015:2022, 'NF3']
+df_conc.loc[2004:2022, 'CH3Cl'] = df_agage_ms.loc[2004:2022, 'CH3Cl']
+df_conc.loc[2004:2022, 'CF4'] = df_agage_ms.loc[2004:2022, 'CF4']
+df_conc.loc[2004:2022, 'C2F6'] = df_agage_ms.loc[2004:2022, 'C2F6']
+df_conc.loc[2004:2022, 'C3F8'] = df_agage_ms.loc[2004:2022, 'C3F8']
+df_conc.loc[2004:2022, 'CFC-13'] = df_agage_ms.loc[2004:2022, 'CFC-13']
+df_conc.loc[2004:2022, 'CFC-115'] = df_agage_ms.loc[2004:2022, 'CFC-115']
+df_conc.loc[2020:2022, 'CHCl3'] = df_agage_ms.loc[2020:2022, 'CHCl3']
 
 # %%
-df_agage_md
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    gas = 'CH2Cl2'
+    offset = pd.DataFrame((df_agage_ms[gas] - df_conc[gas])).mean().values[0]
+    df_conc.loc[2020:2022, gas] = pd.DataFrame((df_agage_ms.loc[2020:2022, gas]) - offset)
 
 # %%
-#df_agage_ms.loc[2008:2020, 'HFC4310mee']
+df_conc.loc[2020:2023, 'CFC-114'] = df_update.loc[2020:2023, 'CFC-114']
 
 # %%
-#df_conc.loc[2011:2020, 'HFC-43-10mee'] = df_agage_ms.loc[2011:2020, 'HFC4310mee']
+# let's see how it looks post-update
+fig, ax = pl.subplots(4,4, figsize=(16, 16))
+for igas, gas in enumerate(['HFC-236fa', 'HFC-245fa', 'HFC-43-10mee', 'CH3Cl', 'CH2Cl2', 'CHCl3',
+    'SO2F2', 'NF3', 'CF4', 'C2F6', 'C3F8', 'CFC-13', 'CFC-114', 'CFC-115']):
+    i = igas//4
+    j = igas%4
+    ax[i,j].plot(df_conc[gas], lw=3)
+    ax[i,j].plot(df_agage_ms[gas])
+    if gas not in ['HFC-43-10mee']:
+        ax[i,j].plot(df_update[gas])
+    ax[i,j].set_title(gas)
+    ax[i,j].set_xlim(1980, 2025)
+
+# %%
+# anything still left take from the 2023 update
+df_conc.tail(11)
+
+# %%
+common_gases = [gas for gas in df_conc.columns if gas in df_update.columns]
+df_conc.loc[2020, common_gases]
+
+# %%
+for gas in ['CFC-112', 'CFC-113a', 'HCFC-133a']:
+    df_conc.loc[2019:2023, gas] = df_update.loc[2019:2023, gas]
+    df_conc.loc[2015:2019, gas] = df_conc.loc[2015:2019, gas].interpolate()
 
 # %%
 df_conc.loc[1850:1989, 'i-C6F14'] = 0
@@ -311,7 +503,10 @@ for col in df_conc.columns:
     df_conc.loc[x, col] = linear(x, *col_params[col])
 
 # %%
-df_conc
+df_conc.head()
+
+# %%
+df_conc.tail(11)
 
 # %%
 os.makedirs('../output', exist_ok = True)
