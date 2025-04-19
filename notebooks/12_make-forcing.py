@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -23,11 +23,10 @@
 # 2. CMIP7 historical ends in 2023, and no future dataset is yet prescribed (see https://solarisheppa.geomar.de/cmip7)
 #
 # 2024 differences compared to 2023:
-# - using CAMS to extend CEDS beyond 2022
+# - using CAMS to extend CEDS to 2024
 # - water vapour from HTHH is an estimate for 2024
-# - GFED is assumed mean of last 5 years beyond 2023
 # - stratospheric water vapour scales with methane concentrations not methane forcing
-# - land use change is from LUH2 + GCB2024 for albedo and FAO for irrigation, replacing the cumulative CO2 AFOLU estimate **and we also update the uncertainties to take into account the separate assessments on these ranges**
+# - land use change is from LUH2 + GCB2024 for albedo and FAO for irrigation, replacing the cumulative CO2 AFOLU estimate **and we also update the uncertainties to take into account the separate assessments on these ranges** - this is a big improvement, thanks to Thomas Gasser and Chris Wells
 
 # %%
 import copy
