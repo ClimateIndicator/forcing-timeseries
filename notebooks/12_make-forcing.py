@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -23,11 +23,10 @@
 # 2. CMIP7 historical ends in 2023, and no future dataset is yet prescribed (see https://solarisheppa.geomar.de/cmip7)
 #
 # 2024 differences compared to 2023:
-# - using CAMS to extend CEDS beyond 2022
+# - using CAMS to extend CEDS to 2024
 # - water vapour from HTHH is an estimate for 2024
-# - GFED is assumed mean of last 5 years beyond 2023
 # - stratospheric water vapour scales with methane concentrations not methane forcing
-# - land use change is from LUH2 + GCB2024 for albedo and FAO for irrigation, replacing the cumulative CO2 AFOLU estimate **and we also update the uncertainties to take into account the separate assessments on these ranges**
+# - land use change is from LUH2 + GCB2024 for albedo and FAO for irrigation, replacing the cumulative CO2 AFOLU estimate **and we also update the uncertainties to take into account the separate assessments on these ranges** - this is a big improvement, thanks to Thomas Gasser and Chris Wells
 
 # %%
 import copy
@@ -636,9 +635,6 @@ pl.plot(forcing['BC_on_snow'])
 concentrations
 
 # %%
-meinshausen2020
-
-# %%
 concentrations.loc[2024].values.shape
 
 # %%
@@ -728,11 +724,33 @@ meinshausen2020(
 )
 
 # %%
+forcing_reference_concentration = np.zeros(52)
+forcing_reference_concentration[0] = 277.15
+forcing_reference_concentration[1] = 731.41
+forcing_reference_concentration[2] = 273.87
+
+# %%
+#help(meinshausen2020)
+ghg_forcing_offset = meinshausen2020(
+    concentrations.loc[1750].values,
+    forcing_reference_concentration,
+    adjustments,
+    radeff_array,
+    [0],
+    [1],
+    [2],
+    list(range(3,52))
+)
+
+# %%
+ghg_forcing_offset
+
+# %%
 ghg_out = np.zeros((275, 52))
 for i, year in enumerate(range(1750, 2025)):
     ghg_out[i, :] = meinshausen2020(
         concentrations.loc[year].values,
-        concentrations.loc[1750].values,
+        forcing_reference_concentration,
         adjustments,
         radeff_array,
         [0],
@@ -741,7 +759,7 @@ for i, year in enumerate(range(1750, 2025)):
         list(range(3,52))
     )
 for igas, gas in enumerate(concentrations.columns):
-    forcing[gas] = ghg_out[:, igas]
+    forcing[gas] = ghg_out[:, igas] - ghg_forcing_offset[igas]
 
 # %%
 pl.plot(ghg_out.sum(axis=1))
@@ -757,7 +775,7 @@ forcing['CO2'][0]
 
 # %%
 # get temperature time series, needed to back out temperature feedback
-temp_obs = pd.read_csv('../data/gmst/IGCC_GMST_1850-2023.csv', index_col=0).values
+temp_obs = pd.read_csv('../data/gmst/IGCC_GMST_1850-2024.csv', index_col=0).values
 delta_gmst = [
     0,
     temp_obs[65:76].mean(),
