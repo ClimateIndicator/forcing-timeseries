@@ -635,9 +635,6 @@ pl.plot(forcing['BC_on_snow'])
 concentrations
 
 # %%
-meinshausen2020
-
-# %%
 concentrations.loc[2024].values.shape
 
 # %%
@@ -727,11 +724,33 @@ meinshausen2020(
 )
 
 # %%
+forcing_reference_concentration = np.zeros(52)
+forcing_reference_concentration[0] = 277.15
+forcing_reference_concentration[1] = 731.41
+forcing_reference_concentration[2] = 273.87
+
+# %%
+#help(meinshausen2020)
+ghg_forcing_offset = meinshausen2020(
+    concentrations.loc[1750].values,
+    forcing_reference_concentration,
+    adjustments,
+    radeff_array,
+    [0],
+    [1],
+    [2],
+    list(range(3,52))
+)
+
+# %%
+ghg_forcing_offset
+
+# %%
 ghg_out = np.zeros((275, 52))
 for i, year in enumerate(range(1750, 2025)):
     ghg_out[i, :] = meinshausen2020(
         concentrations.loc[year].values,
-        concentrations.loc[1750].values,
+        forcing_reference_concentration,
         adjustments,
         radeff_array,
         [0],
@@ -740,7 +759,7 @@ for i, year in enumerate(range(1750, 2025)):
         list(range(3,52))
     )
 for igas, gas in enumerate(concentrations.columns):
-    forcing[gas] = ghg_out[:, igas]
+    forcing[gas] = ghg_out[:, igas] - ghg_forcing_offset[igas]
 
 # %%
 pl.plot(ghg_out.sum(axis=1))
