@@ -269,9 +269,10 @@ labels = {
 for specie in species:
     ax.plot(year, best[specie], color=colors[specie], lw=1, label=labels[specie])
 
+ax.fill_between(np.arange(2020, 2025), -5, 5, color="#e0e0e0")
+
 ax.fill_between(year, unc['anthro'][0,:], unc['anthro'][1,:], color=colors['anthro'], alpha=0.3, lw=0, label='Total anthropogenic 90% range')
 ax.plot(year, best['anthro'], color=colors['anthro'], lw=2, label=labels['anthro'])  
-
 
 ax.plot(0, 0, color='None', lw=0, label='\n')
 ax.plot(0, 0, color='None', lw=0, label='\n')
