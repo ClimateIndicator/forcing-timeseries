@@ -66,12 +66,24 @@ for variable in [
     'land_use',
     'BC_on_snow',
     'H2O_stratospheric',
-    'solar'
+    'solar',
+    'volcanic',
 ]:
     print(variable, np.percentile(ds[variable].loc[dict(time=2024)], (5, 50, 95)), df.loc[2024, variable])
 
+# %%
+# pick 1000 for export
+with open('../data/random_seeds.json') as f:
+    seeds = json.load(f)
+
+# %%
+np.random.seed(seeds[99])
+subset = np.random.choice(np.arange(SAMPLES), 1000, replace=False)
+
 # %% [markdown]
 # ## Aggregated categories
+#
+# and also individual categories for further DAMIP work
 
 # %%
 total_best     = np.zeros((275))
@@ -110,12 +122,27 @@ df_out.columns = ['total', 'natural', 'anthropogenic', 'wmghgs', 'other_ant']
 df_out.to_csv('../output/ERF_best_DAMIP_1750-2024.csv')
 
 # %%
+# aggregated
 total     = np.zeros((275, SAMPLES))
 natural   = np.zeros((275, SAMPLES))
 aerosol   = np.zeros((275, SAMPLES))
 wmghg     = np.zeros((275, SAMPLES))
 other_ant = np.zeros((275, SAMPLES))
 halogen   = np.zeros((275, SAMPLES))
+
+# individual
+co2       = ds['CO2']
+ch4       = ds['CH4']
+n2o       = ds['N2O']
+o3        = ds['O3']
+ari       = ds['aerosol-radiation_interactions']
+aci       = ds['aerosol-cloud_interactions']
+contrails = ds['contrails']
+land_use  = ds['land_use']
+bc_snow   = ds['BC_on_snow']
+h2o_strat = ds['H2O_stratospheric']
+solar     = ds['solar']
+volcanic  = ds['volcanic']
 
 for variable in tqdm(variables):
     #print(variable)
@@ -145,27 +172,12 @@ pl.plot(np.arange(1750, 2025), aerosol[:, :7]);
 print('halogen', np.percentile(halogen[-1,:], (5, 50, 95)), halogen_best[2024])
 
 # %%
-# total     = np.zeros((273, 100000))
-# natural   = np.zeros((273, 100000))
-# aerosol   = np.zeros((273, 100000))
-# wmghg     = np.zeros((273, 100000))
-# other_ant = np.zeros((273, 100000)) 
-
 print('total:        ', np.percentile(total[-1, :], (5, 50, 95)))
 print('anthropogenic:', np.percentile(total[-1, :]-natural[-1, :], (5, 50, 95)))
 print('natural:      ', np.percentile(natural[-1, :], (5, 50, 95)))
 print('aerosol:      ', np.percentile(aerosol[-1, :], (5, 50, 95)))
 print('wmghg:        ', np.percentile(wmghg[-1, :], (5, 50, 95)))
 print('other_ant:    ', np.percentile(other_ant[-1, :], (5, 50, 95)))
-
-# %%
-# pick 1000 for export
-with open('../data/random_seeds.json') as f:
-    seeds = json.load(f)
-
-# %%
-np.random.seed(seeds[99])
-subset = np.random.choice(np.arange(SAMPLES), 1000, replace=False)
 
 # %%
 print('total:        ', np.percentile(total[-1, subset], (5, 50, 95)))
@@ -176,6 +188,7 @@ print('wmghg:        ', np.percentile(wmghg[-1, subset], (5, 50, 95)))
 print('other_ant:    ', np.percentile(other_ant[-1, subset], (5, 50, 95)))
 
 # %%
+# aggregated
 xr.Dataset(
     {
         'total': total[:, subset],
@@ -184,6 +197,26 @@ xr.Dataset(
         'other_ant': other_ant[:, subset]
     }
 ).to_netcdf('../output/ERF_DAMIP_1000.nc')
+
+# %%
+# individual
+xr.Dataset(
+    {
+        'co2': co2[:, subset],
+        'ch4': ch4[:, subset],
+        'n2o': n2o[:, subset],
+        'halogen': halogen[:, subset],
+        'o3': o3[:, subset],
+        'aerosol-radiation_interactions': ari[:, subset],
+        'aerosol-cloud_interactions': aci[:, subset],
+        'contrails': contrails[:, subset],
+        'land_use': land_use[:, subset],
+        'bc_snow': bc_snow[:, subset],
+        'h2o_strat': h2o_strat[:, subset],
+        'solar': solar[:, subset],
+        'volcanic': volcanic[:, subset]
+    }
+).to_netcdf('../output/ERF_DAMIP_1000_full.nc')
 
 # %%
 ds.close()
