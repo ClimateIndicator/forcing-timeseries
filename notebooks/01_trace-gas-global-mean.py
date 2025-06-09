@@ -31,14 +31,14 @@
 #
 # https://gml.noaa.gov/aftp/data/ is usually a good place to look
 #
-# NOAA (accessed 2025-04-09):
+# NOAA (accessed 2025-06-09):
 # - https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/n2o/n2o_annmean_gl.txt
 # - https://gml.noaa.gov/webdata/ccgg/trends/sf6/sf6_annmean_gl.txt
 # - https://gml.noaa.gov/aftp/data/hats/Total_Cl_Br/2024%20update%20total%20Cl%20Br%20&%20F.xls  (converted to CSV with header and footer rows stripped out; save as noaa_**YYYY**_global_mean_mixing_ratios.csv) **note: each year, check the FTP directory to see if there has been an annual update**
 #
-# AGAGE (accessed 2025-02-12, no update as of April):
+# AGAGE (accessed 2025-02-12, no update as of June):
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt
 # - https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt
 #
@@ -160,7 +160,7 @@ df_update
 
 # %%
 # typically year of assessment minus 1
-df_ch4_noaa.loc[1984:2023, 'mean']
+df_ch4_noaa.loc[1984:2024, 'mean']
 
 # %%
 # this comes from Jens Muhle for IGCC2024
@@ -187,6 +187,20 @@ df_noaa_update.drop(index=np.nan, inplace=True)
 df_noaa_update.index = (df_noaa_update.index-0.5).astype(int)  # the index provided by Lindsay is correct but we want to be consistent across datasets
 df_noaa_update[df_noaa_update=="nd"]=np.nan
 df_noaa_update.rename(columns={'H2402': 'H-2402'}, inplace=True)
+
+# NB: some of the GHG concentrations are marked red in the excel spreadsheet, and they do look a bit fishy. In this update I will exclude them 
+# and see what impact it makes
+
+# CFC-11 is marked red but the trend looks OK - it follows recent declines
+# CCl4: the same
+# CFC-12: the same
+# Halon-1301 has an increase after a trend of stabilisation and decline. Maybe stick with this
+df_noaa_update.loc[2024, "H-1301"] = np.nan
+# HFC-143a shows a decline. This probably isn't right
+df_noaa_update.loc[2024, "HFC-143a"] = np.nan
+# HFC-125 the same
+df_noaa_update.loc[2024, "HFC-125"] = np.nan
+
 df_noaa_update
 
 # %%
@@ -199,10 +213,11 @@ df_conc.loc[1750:1978, 'CO2'] = df_conc.loc[1750:1978, 'CO2'] * 1.00079 - 0.142
 df_conc.loc[1979:2024, 'CO2'] = df_co2.loc[1979:2024, 'mean']
 
 # CH4 and N2O is average of NOAA (Lindsay's file) and AGAGE
-# same for CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-125, HFC-134a
+# same for CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-134a
 # For methane and N2O, the calibration scales have not changed, and we use multiple datasets.
 # since we don't have the AGAGE data here before 2019, take the average of NOAA and AGAGE from 2019 onwards and keep pre-2019 from IPCC
-for gas in ['CCl4', 'CFC-11', 'CFC-12', 'CH4', 'HCFC-22', 'HFC-125', 'HFC-134a', 'N2O']:
+# HFC-125 is now done differently
+for gas in ['CCl4', 'CFC-11', 'CFC-12', 'CH4', 'HCFC-22', 'HFC-134a', 'N2O']:
     df_conc.loc[2019:2024, gas] = np.mean((df_noaa_update.loc[2019:2024, gas], df_agage_recent.loc[2019:2024, gas]), axis=0).astype(float)
 
 # %%
@@ -268,6 +283,16 @@ with warnings.catch_warnings():
         two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_ms[gas])).mean().values[0]
         df_conc.loc[2020:2022, gas] = pd.DataFrame((df_noaa_update.loc[2020:2022, gas], df_agage_ms.loc[2020:2022, gas])).mean()
         df_conc.loc[2023:2024, gas] = pd.DataFrame((df_noaa_update.loc[2023:2024, gas]) - two_dataset_mean)
+
+# %%
+# since we removed HFC-125, add it back here
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    for gas in ['HFC-125']:
+        two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_recent[gas])).mean().values[0]
+        df_conc.loc[2020:2023, gas] = pd.DataFrame((df_noaa_update.loc[2020:2023, gas], df_agage_recent.loc[2020:2023, gas])).mean()
+        df_conc.loc[2024, gas] = df_agage_recent.loc[2024, gas] - two_dataset_mean
 
 # %%
 # CFC-113 is special case; do the NOAA extrapolation from 2020, and assume the previously given values for 2018 and 2019 are good.
