@@ -15,7 +15,7 @@
 # %% [markdown]
 # # Update IPCC AR6 ERF timeseries
 #
-# - with updated **preliminary** data to 2024
+# - with updated data through 2024
 #
 # **NOTE**: we continue to use CMIP6 solar forcing, because
 #
