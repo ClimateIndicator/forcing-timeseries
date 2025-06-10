@@ -278,7 +278,7 @@ for igas, gas in enumerate(['HCFC-22', 'CFC-113', 'HCFC-141b', 'HCFC-142b', 'CH3
 # turn off pandas warnings - why is pandas so fragile? why do they keep changing stuff?!
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
-    for gas in ['HCFC-22', 'HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
+    for gas in ['HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
         'HFC-152a','HFC-143a', 'HFC-365mfc', 'HFC-227ea', 'HFC-23', 'SF6']:
         two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_ms[gas])).mean().values[0]
         df_conc.loc[2020:2022, gas] = pd.DataFrame((df_noaa_update.loc[2020:2022, gas], df_agage_ms.loc[2020:2022, gas])).mean()
@@ -286,10 +286,10 @@ with warnings.catch_warnings():
 
 # %%
 # since we removed HFC-125, add it back here
-
+# and we want to use HCFC-22 from AGAGE
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
-    for gas in ['HFC-125']:
+    for gas in ['HCFC-22', 'HFC-125']:
         two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_recent[gas])).mean().values[0]
         df_conc.loc[2020:2023, gas] = pd.DataFrame((df_noaa_update.loc[2020:2023, gas], df_agage_recent.loc[2020:2023, gas])).mean()
         df_conc.loc[2024, gas] = df_agage_recent.loc[2024, gas] - two_dataset_mean
