@@ -34,6 +34,8 @@
 # - https://gml.noaa.gov/webdata/ccgg/trends/sf6/sf6_annmean_gl.txt  [last year 2024]
 # - https://gml.noaa.gov/aftp/data/hats/Total_Cl_Br/2024%20update%20total%20Cl%20Br%20&%20F.xls  (converted to CSV with header and footer rows stripped out; save as noaa_**YYYY**_global_mean_mixing_ratios.csv) **note: each year, check the FTP directory to see if there has been an annual update**  [last year 2023]
 #
+# Data provided by Lindsay Lan on 2016-02-20 for CO2, CH4, N2O, SF6
+#
 # AGAGE (accessed 2026-02-18 from https://zenodo.org/records/18462271)
 # - in previous years we used global mean values put on the AGAGE website available at https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt and https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt. These files are no longer publicly available but there ar data files in the 2025 publication by Luke Western et al. (https://essd.copernicus.org/articles/17/6557/2025/) with the data at https://doi.org/10.5281/zenodo.18462271. This will be used here.
 #
@@ -80,6 +82,15 @@ df_ch4_noaa = pd.read_csv(
 # %%
 df_n2o_noaa = pd.read_csv(
     '../data/ghg_concentrations/noaa_gml/n2o_annmean_gl.txt', 
+    sep=r'\s+',
+    comment='#', 
+    names=['year', 'mean', 'unc'],
+    index_col=0
+)
+
+# %%
+df_sf6_noaa = pd.read_csv(
+    '../data/ghg_concentrations/noaa_gml/sf6_annmean_gl.txt', 
     sep=r'\s+',
     comment='#', 
     names=['year', 'mean', 'unc'],
@@ -346,6 +357,31 @@ with warnings.catch_warnings():
 for gas in ["Halon-1301", "HFC-143a", "HFC-125"]:
     two_dataset_mean = pd.DataFrame((df_agage[gas] - df_noaa_update[gas])).mean().values[0]
     df_conc.loc[2024, gas] = df_agage.loc[2024, gas] - two_dataset_mean
+
+# %%
+df_lindsay20260220 = pd.DataFrame([[425.63, 1936.55, 338.86, 12.24]], index=[2025], columns=["CO2", "CH4", "N2O", "SF6"])
+
+# %%
+df_lindsay20260220
+
+# %%
+# 2025 values from Lindsay provided by email 2016-02-20, all from NOAA
+# df_conc.loc[2025, 'CH4'] = 1936.55
+# df_conc.loc[2025, 'N2O'] = 338.86
+# df_conc.loc[2025, 'SF6'] = 12.24
+
+# CO2 is only from NOAA so can go straight in
+df_conc.loc[2025, 'CO2'] = df_lindsay20260220.loc[2025, 'CO2']
+
+# CH4, N2O and SF6 are mean of NOAA and AGAGE, extend with NOAA using difference of two
+two_dataset_mean = pd.DataFrame((df_ch4_noaa.loc[2020:2024, 'mean'] - df_agage.loc[2020:2024, "CH4"])).mean().values[0]
+df_conc.loc[2025, 'CH4'] = df_lindsay20260220.loc[2025, 'CH4'] - two_dataset_mean
+
+two_dataset_mean = pd.DataFrame((df_n2o_noaa.loc[2020:2024, 'mean'] - df_agage.loc[2020:2024, "N2O"])).mean().values[0]
+df_conc.loc[2025, 'N2O'] = df_lindsay20260220.loc[2025, 'N2O'] - two_dataset_mean
+
+two_dataset_mean = pd.DataFrame((df_sf6_noaa.loc[2020:2024, 'mean'] - df_agage.loc[2020:2024, "SF6"])).mean().values[0]
+df_conc.loc[2025, 'SF6'] = df_lindsay20260220.loc[2025, 'SF6'] - two_dataset_mean
 
 # %%
 df_conc.tail(10)
