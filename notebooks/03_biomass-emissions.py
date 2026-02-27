@@ -26,6 +26,7 @@ import os
 import numpy as np
 import pandas as pd
 import h5py
+import pooch
 import matplotlib.pyplot as pl
 
 # %%
@@ -46,6 +47,7 @@ files['emissions_factors'] = pooch.retrieve(
     hashes['emissions_factors']
 )
 
+# %%
 efs = pd.read_csv(files['emissions_factors'], comment='#', sep=r'\s+', index_col=0, header=None)
 efs.columns = ['SAVA', 'BORF', 'TEMF', 'DEFO', 'PEAT', 'AGRI']
 efs.index.rename('SPECIE', inplace=True)
@@ -97,6 +99,15 @@ for year in range(start_year, end_year+1):
 table = table / 1E12
 
 # %%
+f.close()
+
+# %%
+f = h5py.File(files[2018], 'r')
+
+# %%
+f['emissions/07/DM'][:]
+
+# %%
 species=list(efs.index)
 gfed41s_df = pd.DataFrame(table.T, index=range(start_year, end_year+1), columns=species)
 gfed41s_df['NMVOC'] = gfed41s_df.loc[:,'C2H6':'C3H6O'].sum(axis=1) + gfed41s_df.loc[:,'C2H6S':].sum(axis=1)
@@ -106,6 +117,6 @@ gfed41s_df
 
 # %%
 os.makedirs('../output/', exist_ok=True)
-gfed41s_df.to_csv('../output/gfed4.1s_1997-2024.csv')
+gfed41s_df.to_csv('../output/gfed4.1s.csv')
 
 # %%
