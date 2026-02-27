@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.0
+#       jupytext_version: 1.19.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -13,13 +13,11 @@
 # ---
 
 # %% [markdown]
-# # Download and process biomass burning emissions
+# # Process biomass burning emissions
 #
-# New for 2025: The GFED data is now on an FTP server and can't be directly downloaded over HTTP. Therefore, use an SFTP client and log in thus:
+# See check_gfed_diffs.py
 #
-# https://www.globalfiredata.org/ancill/GFED5_SFTP_info.txt
-#
-# We will continue to use GFED4.1s while this is still updated.
+# **2025 is not yet complete** (at least the file was uploaded on 2025-10-24, so if there is 2025 data it is an estimate/extension)
 
 # %%
 import os
@@ -37,10 +35,13 @@ hashes = {
 files = {}
 
 for year in range(1997, 2017):
-    files[year] = f"../data/slcf_emissions/gfed/GFED4.1s_{year}.hdf5"
+    files[year] = f"../data/slcf_emissions/gfed/gfed_4.1s_gwerf/GFED4.1s_{year}.hdf5"
 
-for year in range(2017, 2026):
-    files[year] = f"../data/slcf_emissions/gfed/GFED4.1s_{year}_beta.hdf5"
+for year in range(2017, 2024):
+    files[year] = f"../data/slcf_emissions/gfed/gfed_4.1s_gwerf/GFED4.1s_{year}_beta.hdf5"
+
+for year in range(2024, 2026):
+    files[year] = f"../data/slcf_emissions/gfed/gfed_4.1s_sftp/GFED4.1s_{year}_beta.hdf5"
 
 files['emissions_factors'] = pooch.retrieve(
     "https://www.geo.vu.nl/~gwerf/GFED/GFED4/ancill/GFED4_Emission_Factors.txt",
@@ -59,7 +60,7 @@ species=list(efs.index)
 
 months       = '01','02','03','04','05','06','07','08','09','10','11','12'
 start_year = 1997
-end_year   = 2025
+end_year   = 2024
 
 
 """
@@ -69,27 +70,27 @@ table = np.zeros((41, end_year - start_year + 1)) # region, year
 
 for year in range(start_year, end_year+1):
     print(year)
-    f = h5py.File(files[year], 'r')
-
-
-    if year == start_year: # these are time invariable
-        grid_area     = f['/ancill/grid_cell_area'][:]
-
-    emissions = np.zeros((41, 720, 1440))
-    for month in range(12):
-        # read in DM emissions
-        string = '/emissions/'+months[month]+'/DM'
-        DM_emissions = f[string][:]
-        for ispec, specie in enumerate(species):
-            for isrc, source in enumerate(sources):
-                # read in the fractional contribution of each source
-                string = '/emissions/'+months[month]+'/partitioning/DM_'+source
-                contribution = f[string][:]
-                # calculate emissions as the product of DM emissions (kg DM per
-                # m2 per month), the fraction the specific source contributes to
-                # this (unitless), and the emission factor (g per kg DM burned)
-                emissions[ispec, ...] += DM_emissions * contribution * efs.loc[specie, source]
-                #print(emissions[:, 88, 0])
+    
+    with h5py.File(files[year], 'r') as f:
+        
+        if year == start_year: # these are time invariable
+            grid_area     = f['/ancill/grid_cell_area'][:]
+    
+        emissions = np.zeros((41, 720, 1440))
+        for month in range(12):
+            # read in DM emissions
+            string = '/emissions/'+months[month]+'/DM'
+            DM_emissions = f[string][:]
+            for ispec, specie in enumerate(species):
+                for isrc, source in enumerate(sources):
+                    # read in the fractional contribution of each source
+                    string = '/emissions/'+months[month]+'/partitioning/DM_'+source
+                    contribution = f[string][:]
+                    # calculate emissions as the product of DM emissions (kg DM per
+                    # m2 per month), the fraction the specific source contributes to
+                    # this (unitless), and the emission factor (g per kg DM burned)
+                    emissions[ispec, ...] += DM_emissions * contribution * efs.loc[specie, source]
+                    #print(emissions[:, 88, 0])
 
 
     # fill table with total values for the globe (row 15) or basisregion (1-14)
@@ -97,15 +98,6 @@ for year in range(start_year, end_year+1):
     table[:, year-start_year] = np.sum(grid_area[None, ...] * emissions, axis=(1,2))
 
 table = table / 1E12
-
-# %%
-f.close()
-
-# %%
-f = h5py.File(files[2018], 'r')
-
-# %%
-f['emissions/07/DM'][:]
 
 # %%
 species=list(efs.index)
