@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -18,15 +18,17 @@
 # Use the AR6 process for volcanic forcing with updates:
 # - replace Toohey & Sigl (eVolv v2) with Sigl et al. (HolVol) which extends back to 9500 BC. We use the full "pre-industrial" (9500 BC to 1749 AD) as the average background sAOD to reference zero forcing to.
 # - use CMIP7 1750-2023
-# - ues GloSSAC v2.2.2 until the end of 2023
-# - Extend forwards to 2023 past the end of GlossAC using sAOD from OMPS LP, following the use of this dataset in https://www.nature.com/articles/s43247-022-00580-w#Sec11 **note that at present July 2024 is missing**
+# - ues GloSSAC v2.2.3 until the end of 2024
+# - Extend forwards to 2025 past the end of GlossAC using sAOD from OMPS LP, following the use of this dataset in https://www.nature.com/articles/s43247-022-00580-w#Sec11 **note that at present July 2024 and Oct to Dec 2025 is missing**
 # - 2023 update to GloSSAC is coming and may replace the OMPS LP data if it arrives in time
 #
 # This notebook requires large datasets that need registration to obtain so cannot be downloaded by the code:
 #
 # - Download data from: https://download.pangaea.de/dataset/928646/files/HolVol_SAOD_-9500_1900_v1.0.nc Put this in '../data/volcanic_aod/HolVol_SAOD_-9500_1900_v1.0.nc'
-# - Download data from: https://asdc.larc.nasa.gov/project/GloSSAC/GloSSAC_2.22. Click "Get Dataset". Put this in '../data/volcanic_aod/GloSSAC_V2.22.nc'
-# - Download data from: https://omps.gesdisc.eosdis.nasa.gov/data/SNPP_OMPS_Level3/OMPS_NPP_LP_L3_AER_MONTHLY.1/. Obtain every *.h5 file in every annual sub-directory from 2013 to 2024. Put these files in '../data/volcanic_aod/SNPP_OMPS_Level3/
+# - Download data from: https://asdc.larc.nasa.gov/project/GloSSAC/GloSSAC_2.23. Click "Get Dataset". Put this in '../data/volcanic_aod/GloSSAC_V2.23.nc'
+# - Download data from: https://omps.gesdisc.eosdis.nasa.gov/data/SNPP_OMPS_Level3/OMPS_NPP_LP_L3_AER_MONTHLY.1/. Obtain every *.h5 file in every annual sub-directory from 2013 to 2025. Put these files in '../data/volcanic_aod/SNPP_OMPS_Level3/
+#
+# **Update 2026-04-03: OMPS-LP only available until September 2025 at present**
 #
 # In addition, we require estimates of the stratospheric water vapour injection from Hunga Tonga. The MLS data is processed in notebook 09, taken and run in the offline radiative transfer code, and implemented back here.
 #

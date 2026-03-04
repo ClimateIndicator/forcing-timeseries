@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.1
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -17,7 +17,11 @@
 #
 # See check_gfed_diffs.py
 #
-# **2025 is not yet complete** (at least the file was uploaded on 2025-10-24, so if there is 2025 data it is an estimate/extension)
+# We are using the ones from Guido's website because there are some differences with the files uploaded to the SFTP server, and 2017 on the server is corrupt.
+#
+# 2025 was provided by Guido.
+#
+# 2025 is the last year in which 4.1s can be produced because MODIS is on its way out (Guido, communication)
 
 # %%
 import os
@@ -37,11 +41,8 @@ files = {}
 for year in range(1997, 2017):
     files[year] = f"../data/slcf_emissions/gfed/gfed_4.1s_gwerf/GFED4.1s_{year}.hdf5"
 
-for year in range(2017, 2024):
+for year in range(2017, 2026):
     files[year] = f"../data/slcf_emissions/gfed/gfed_4.1s_gwerf/GFED4.1s_{year}_beta.hdf5"
-
-for year in range(2024, 2026):
-    files[year] = f"../data/slcf_emissions/gfed/gfed_4.1s_sftp/GFED4.1s_{year}_beta.hdf5"
 
 files['emissions_factors'] = pooch.retrieve(
     "https://www.geo.vu.nl/~gwerf/GFED/GFED4/ancill/GFED4_Emission_Factors.txt",
@@ -60,7 +61,7 @@ species=list(efs.index)
 
 months       = '01','02','03','04','05','06','07','08','09','10','11','12'
 start_year = 1997
-end_year   = 2024
+end_year   = 2025
 
 
 """

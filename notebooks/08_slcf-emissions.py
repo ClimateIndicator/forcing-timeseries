@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -15,11 +15,11 @@
 # %% [markdown]
 # # SLCF emissions
 #
-# Fossil and industrial from CEDS (1750-2022), from CEDS v2024.07.08, available at https://doi.org/10.5281/zenodo.12803197
+# Fossil and industrial from CEDS (1750-2023), from CEDS v2025.03.18, available at https://doi.org/10.5281/zenodo.15059443
 #
-# Extend with CAMS for 2023 and 2024 based on CAMS ratio to 2022 emissions. For the fairest comparison, exclude aviation from CEDS when doing the scaling. **May also be some other sectoral mismatches we're not aware of - should probably keep in touch with Lara on this**
+# Extend with CAMS for 2024 and 2025 based on CAMS ratio to 2023 emissions. For the fairest comparison, exclude aviation from CEDS when doing the scaling. **May also be some other sectoral mismatches we're not aware of - should probably keep in touch with Lara on this**
 #
-# Biomass burning from GFED (1997-2024), extended backwards to 1750 using BB4CMIP **TODO: replace with the CMIP7 pipeline**, which is part of the CMIP6 database and taken here from RCMIP. We need to convert the unit of NOx emissions from biomass to NO2 from the RCMIP data, as GFED reports in units of NO.
+# Biomass burning from GFED (1997-2025), extended backwards to 1750 using BB4CMIP **TODO: replace with the CMIP7 pipeline**, which is part of the CMIP6 database and taken here from RCMIP. We need to convert the unit of NOx emissions from biomass to NO2 from the RCMIP data, as GFED reports in units of NO.
 
 # %%
 import os
@@ -33,7 +33,7 @@ import matplotlib.pyplot as pl
 species = ['BC', 'OC', 'SO2', 'NOx', 'CO', 'NMVOC', 'NH3', 'CH4', 'N2O']
 
 # %%
-slcf_df = pd.DataFrame(columns = species, index=np.arange(1750, 2025, dtype=int))
+slcf_df = pd.DataFrame(columns = species, index=np.arange(1750, 2026, dtype=int))
 ceds_df = pd.DataFrame(columns = species, index=np.arange(1750, 2024, dtype=int))
 ceds_no_aviation_df = pd.DataFrame(columns = species, index=np.arange(1750, 2024, dtype=int))
 
@@ -57,7 +57,7 @@ ceds_df
 ceds_no_aviation_df
 
 # %%
-gfed41s_df = pd.read_csv('../output/gfed4.1s_1997-2024.csv', index_col=0)
+gfed41s_df = pd.read_csv('../output/gfed4.1s.csv', index_col=0)
 
 # %%
 gfed41s_df
@@ -121,10 +121,15 @@ for specie in species:
         gfed41s_df.loc[1997:2023, specie].values.squeeze() * gfed_convert[specie]
     )
 
-    # assume emissions for 2024 in CEDS based on 2023 CEDS/CAMS ratio applied to 2024 in CAMS
+    # assume emissions for 2024 and 2025 in CEDS based on 2023 CEDS/CAMS ratio applied to 2024 in CAMS
     slcf_df.loc[2024, specie] = (
         cams_df.loc[2024, specie] / cams_df.loc[2023, specie] * ceds_df.loc[2023, specie] + 
         gfed41s_df.loc[2024, specie] * gfed_convert[specie]
+    )
+
+    slcf_df.loc[2025, specie] = (
+        cams_df.loc[2025, specie] / cams_df.loc[2023, specie] * ceds_df.loc[2023, specie] + 
+        gfed41s_df.loc[2025, specie] * gfed_convert[specie]
     )
 
 # %%
@@ -132,7 +137,7 @@ fig, ax = pl.subplots(3, 3, figsize=(9, 9))
 for ispec, specie in enumerate(species):
     irow = ispec // 3
     icol = ispec % 3
-    ax[irow,icol].plot(slcf_df.loc[2000:2024, specie])
+    ax[irow,icol].plot(slcf_df.loc[2000:2025, specie])
     ax[irow,icol].set_title(specie)
 
 # %%
@@ -140,6 +145,6 @@ slcf_df
 
 # %%
 os.makedirs('../output', exist_ok=True)
-slcf_df.to_csv('../output/slcf_emissions_1750-2024.csv')
+slcf_df.to_csv('../output/slcf_emissions.csv')
 
 # %%

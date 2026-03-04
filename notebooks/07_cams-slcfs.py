@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -28,19 +28,18 @@
 #
 # **Therefore, my hypothesis is for the fairest, most reliable, most consistent comparison that we should compare total minus aviation in CEDS to total minus agricultural waste burning in CAMS.**
 #
-# From this comparison, we see that there is still quite a lot of disagreement between the datasets; but we use CAMS to extend CEDS by taking the ratio of CAMS in 2024 to 2023.
-#
-# **CEDS 2023 is now available and public-ish: the data is from Steve Smith's dropbox; Zenodo DOI will be forthcoming**
+# From this comparison, we see that there is still quite a lot of disagreement between the datasets; but we use CAMS to extend CEDS by taking the ratio of CAMS in 2024 and 2025 to 2023.
 #
 # I'm using the processed data from ScenarioMIP prepared by Marco Gambarini (the totals are basically identical to doing the following steps, but Marco has retained the sectoral detail). Marco adds aviation in, so I take it back out. This file is processed by the IIASA Emissions Historical time series at
 #
 # https://github.com/iiasa/emissions_harmonization_historical/blob/main/notebooks/0150_CAMS.py
 #
-# Unfortunately there doesn't seem to be a way to automate downloads of CAMS data, so if you want to grab it:
+# Unfortunately there doesn't seem to be a way to automate downloads of CAMS data. The README in the https://github.com/iiasa/emissions_harmonization_historical contains the details, but in short
 #
 # - https://eccad.sedoo.fr/#/data
 # - select CAMS-GLOB_ANT v6.2
 # - select species
+# - go to Time Series tab
 # - select Sum Sectors and Agricultural Waste Burning
 
 # %%
@@ -130,6 +129,6 @@ pl.savefig('../plots/cams_ceds.png')
 pl.savefig('../plots/cams_ceds.pdf')
 
 # %%
-cams_df.to_csv('../output/cams_2000-2025.csv')
+cams_df.to_csv('../output/cams.csv')
 
 # %%

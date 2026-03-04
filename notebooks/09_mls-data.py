@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -19,9 +19,9 @@
 #
 # To obtain the data, go to https://search.earthdata.nasa.gov/search?q=MLS%20H2O&fi=MLS&fl=3%2B-%2BGridded%2BObservations. Select the MLS/Aura Level 3 Monthly Binned Water Vapor (H2O) Mixing Ratio on Assorted Grids V005 (ML3MBH2O). Download this data to ../data/mls.
 #
-# **update 13.02.2025: 2024 data not yet ready on monthly basis, but daily data available, should use this?**
+# In 2026, the monthly data files for 2024 are now available and can be used for evaluating HTHH (unlike this time last year where we had to do daily)
 #
-# We are missing day 127 and day 366
+# (the daily files in 2024 were missing day 127 and day 366)
 
 # %%
 from netCDF4 import Dataset
@@ -32,41 +32,41 @@ from fair.earth_params import mass_atmosphere
 import xarray as xr
 
 # %%
-data = np.ones((21*12, 39)) * np.nan
+data = np.ones((22*12, 39)) * np.nan
 
 # %%
-for year in range(2004, 2024):
+for year in range(2004, 2026):
     nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3MB-H2O_*_{year}.nc')[0])
     data[(year-2004)*12:(year-2004)*12+12, :] = nc.groups['H2O PressureZM'].variables['value'][:, 10:49, 15:30].mean(axis=2)
     plev = nc.groups['H2O PressureZM'].variables['lev'][10:49]
     nc.close()
 
 # %%
-data_2024 = np.ones((366, 39)) * np.nan
-for day in range(1, 367):
-    if day in [127, 366]:
-        continue
-    nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3DB-H2O_*_2024d{day:03}.nc')[0])
-    data_2024[day-1, :] = nc.groups['H2O PressureZM'].variables['value'][0, 10:49, 15:30].mean(axis=1)
-    plev = nc.groups['H2O PressureZM'].variables['lev'][10:49]
-    nc.close()
+# data_2024 = np.ones((366, 39)) * np.nan
+# for day in range(1, 367):
+#     if day in [127, 366]:
+#         continue
+#     nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3DB-H2O_*_2024d{day:03}.nc')[0])
+#     data_2024[day-1, :] = nc.groups['H2O PressureZM'].variables['value'][0, 10:49, 15:30].mean(axis=1)
+#     plev = nc.groups['H2O PressureZM'].variables['lev'][10:49]
+#     nc.close()
 
 # %%
-data_2024[data_2024==0] = np.nan
+# data_2024[data_2024==0] = np.nan
 
 # %%
-month_length = np.array([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
-month_bounds = np.concat(([0], np.cumsum(month_length)))
-month_start = month_bounds[:-1]
-month_end = month_bounds[1:]
-month_end
+# month_length = np.array([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+# month_bounds = np.concat(([0], np.cumsum(month_length)))
+# month_start = month_bounds[:-1]
+# month_end = month_bounds[1:]
+# month_end
 
 # %%
-for month in range(12):
-    data[240+month, :] = np.nanmean(data_2024[month_start[month]:month_end[month], :], axis=0)
+# for month in range(12):
+    # data[240+month, :] = np.nanmean(data_2024[month_start[month]:month_end[month], :], axis=0)
 
 # %%
-X, Y = np.meshgrid(np.arange(2004+1/24, 2025, 1/12), plev)
+X, Y = np.meshgrid(np.arange(2004+1/24, 2026, 1/12), plev)
 
 # %%
 data[data==0] = np.nan
@@ -74,29 +74,29 @@ data[data==0] = np.nan
 # %%
 fig, ax = pl.subplots(figsize=(7, 3))
 pl.contourf(
-    np.arange(2004+1/24, 2025, 1/12),
+    np.arange(2004+1/24, 2026, 1/12),
     plev[:],
     data.T
 )
 ax = pl.gca()
 ax.set_ylim(ax.get_ylim()[::-1])
-ax.set_xlim(2004, 2025)
+ax.set_xlim(2004, 2026)
 ax.set_ylabel("Pressure (hPa)")
-ax.set_xticks(np.arange(2004, 2026, 3))
+ax.set_xticks(np.arange(2004, 2027, 3))
 
 pl.colorbar(label="water vapour volume mixing ratio")
 pl.savefig('../plots/tape_recorder.png');
 
 # %%
-pl.contourf(
-    np.arange(2024+1/724, 2025, 1/366),
-    plev[:],
-    data_2024.T
-)
-ax = pl.gca()
-ax.set_ylim(ax.get_ylim()[::-1])
-ax.set_xlim(2024, 2025)
-pl.colorbar()
+# pl.contourf(
+#     np.arange(2024+1/724, 2025, 1/366),
+#     plev[:],
+#     data_2024.T
+# )
+# ax = pl.gca()
+# ax.set_ylim(ax.get_ylim()[::-1])
+# ax.set_xlim(2024, 2025)
+# pl.colorbar()
 
 # %%
 plev
@@ -179,11 +179,11 @@ pd.DataFrame(weighting_fractions, index=np.arange(11, 49), columns = era5_plev[1
 # - Convert back to specific humidity
 
 # %%
-data = np.ma.masked_all((21*12, 38, 72, 45)) * np.nan
+data = np.ma.masked_all((22*12, 38, 72, 45)) * np.nan
 data
 
 # %%
-for year in range(2004, 2024):
+for year in range(2004, 2026):
     nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3MB-H2O_*_{year}.nc')[0])
     data[(year-2004)*12:(year-2004)*12+12, ...] = nc.groups['H2O PressureGrid'].variables['value'][:, 11:49, ...]
     plev = nc.groups['H2O PressureGrid'].variables['lev'][10:49]
@@ -194,24 +194,24 @@ for year in range(2004, 2024):
     nc.close()
 
 # %%
-data_2024 = np.ma.masked_all((366, 38, 72, 45)) * np.nan
-for day in range(1, 367):
-    if day in [127, 366]:
-        continue
-    nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3DB-H2O_*_2024d{day:03}.nc')[0])
-    data_2024[day-1, :] = nc.groups['H2O PressureGrid'].variables['value'][0, 11:49, ...]
-    nc.close()
+# data_2024 = np.ma.masked_all((366, 38, 72, 45)) * np.nan
+# for day in range(1, 367):
+#     if day in [127, 366]:
+#         continue
+#     nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3DB-H2O_*_2024d{day:03}.nc')[0])
+#     data_2024[day-1, :] = nc.groups['H2O PressureGrid'].variables['value'][0, 11:49, ...]
+#     nc.close()
 
 # %%
-for month in range(12):
-    data[240+month, ...] = np.ma.mean(data_2024[month_start[month]:month_end[month], ...], axis=0)
+# for month in range(12):
+#     data[240+month, ...] = np.ma.mean(data_2024[month_start[month]:month_end[month], ...], axis=0)
 
 # %%
 # data[data==0] = np.nan
 
 # %%
-era5_data = np.ma.masked_all((21*12, 11, 72, 45))
-era5_h2o_mass = np.ma.masked_all((21*12, 11, 72, 45))
+era5_data = np.ma.masked_all((22*12, 11, 72, 45))
+era5_h2o_mass = np.ma.masked_all((22*12, 11, 72, 45))
 
 # %%
 mass_atmosphere # slice
@@ -280,6 +280,11 @@ for month in range(12):
     mass_h2o_2024[month] = mass_h2o[month+240].sum()/1e9
 
 # %%
+mass_h2o_2025 = np.ma.masked_all(12)
+for month in range(12):
+    mass_h2o_2025[month] = mass_h2o[month+252].sum()/1e9
+
+# %%
 mass_h2o_2022
 
 # %%
@@ -289,6 +294,13 @@ mass_h2o_2023
 mass_h2o_2024
 
 # %%
+mass_h2o_2025
+
+# %%
+# fair to fill in January 2025 as a transition from Dec 2024 to Feb 2025
+mass_h2o_2025[0] = 0.5 * (mass_h2o_2024[11] + mass_h2o_2025[1])
+
+# %%
 (mass_h2o_2022 - mass_h2o_20042021)
 
 # %%
@@ -296,6 +308,9 @@ mass_h2o_2024
 
 # %%
 (mass_h2o_2024 - mass_h2o_20042021)
+
+# %%
+(mass_h2o_2025 - mass_h2o_20042021)
 
 # %%
 weighting_fractions.shape
@@ -331,6 +346,14 @@ era5_h2o_mass_2024 = np.ma.masked_all(12)
 for month in range(12):
     era5_h2o_mass_2024[month] = era5_h2o_mass[month+240].sum()/1e9
 
+era5_h2o_mass_2025 = np.ma.masked_all(12)
+for month in range(12):
+    era5_h2o_mass_2025[month] = era5_h2o_mass[month+252].sum()/1e9
+
+# %%
+# fair to fill in January 2025 as a transition from Dec 2024 to Feb 2025
+era5_h2o_mass_2025[0] = 0.5 * (era5_h2o_mass_2024[11] + era5_h2o_mass_2025[1])
+
 # %%
 era5_h2o_mass_2022 - era5_h2o_mass_20042021
 
@@ -339,6 +362,9 @@ era5_h2o_mass_2023 - era5_h2o_mass_20042021
 
 # %%
 era5_h2o_mass_2024 - era5_h2o_mass_20042021
+
+# %%
+era5_h2o_mass_2025 - era5_h2o_mass_20042021
 
 # %%
 era5_h2o_mass
@@ -356,7 +382,7 @@ X, Y = np.meshgrid(np.arange(2004+1/24, 2025, 1/12), era5_plev[1:])
 
 # %%
 pl.contourf(
-    np.arange(2004+1/24, 2025, 1/12),
+    np.arange(2004+1/24, 2026, 1/12),
     era5_plev[1:],
     era5_data[..., 15:30].mean(axis=(2,3)).T
 )
@@ -380,7 +406,11 @@ for month in range(12):
 
 era5_data_2024 = np.ma.masked_all((12, 11, 72, 45))
 for month in range(12):
-    era5_data_2024[month, ...] = era5_data[month+228, ...]
+    era5_data_2024[month, ...] = era5_data[month+240, ...]
+
+era5_data_2025 = np.ma.masked_all((12, 11, 72, 45))
+for month in range(12):
+    era5_data_2025[month, ...] = era5_data[month+252, ...]
 
 # %%
 era5_ds = xr.Dataset(
@@ -390,7 +420,7 @@ era5_ds = xr.Dataset(
     coords=dict(
         lon=lon,
         lat=lat,
-        time=np.arange(252),
+        time=np.arange(264),
         plev = era5_plev[1:]
     ),
 )
