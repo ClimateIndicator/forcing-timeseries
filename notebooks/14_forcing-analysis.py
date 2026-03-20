@@ -38,6 +38,23 @@ import xarray as xr
 import json
 
 # %%
+pl.rcParams['figure.figsize'] = (10/2.54, 10/2.54)
+pl.rcParams['font.size'] = 11
+pl.rcParams['font.family'] = 'Arial'
+pl.rcParams['ytick.direction'] = 'in'
+pl.rcParams['ytick.minor.visible'] = True
+pl.rcParams['ytick.major.right'] = True
+pl.rcParams['ytick.right'] = True
+pl.rcParams['xtick.direction'] = 'in'
+pl.rcParams['xtick.minor.visible'] = True
+pl.rcParams['xtick.major.top'] = True
+pl.rcParams['ytick.major.left'] = True
+pl.rcParams['xtick.top'] = True
+pl.rcParams['figure.dpi'] = 150
+pl.rcParams['axes.spines.top'] = True
+pl.rcParams['axes.spines.bottom'] = True
+
+# %%
 ds = xr.load_dataset('../output/ERF_ensemble.nc')
 
 # %%
@@ -166,7 +183,13 @@ for variable in tqdm(variables):
 # ## Show shape matters
 
 # %%
-pl.plot(np.arange(1750, 2025), aerosol[:, :7]);
+pl.plot(np.arange(1750, 2025), aerosol[:, :1000], alpha=0.13, lw=0.5, color='g');
+pl.xlim(1750, 2030)
+pl.title('Aerosol ERF, 1000 ensemble members')
+pl.ylabel("W m$^{-2}$")
+pl.tight_layout()
+pl.savefig('../plots/aerosol_erf_1000.png')
+pl.savefig('../plots/aerosol_erf_1000.pdf')
 
 # %%
 print('halogen', np.percentile(halogen[-1,:], (5, 50, 95)), halogen_best[2024])
