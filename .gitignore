@@ -13,6 +13,7 @@ data/slcf_emissions/ceds/v20250311
 data/slcf_emissions/merra
 data/era5
 data/slcf_emissions/gfed/
+data/solar
 
 # large output
 output/*.nc
