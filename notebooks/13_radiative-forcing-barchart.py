@@ -36,7 +36,7 @@ ds = xr.load_dataset('../output/ERF_ensemble.nc')
 variables = list(ds.keys())
 
 # %%
-df = pd.read_csv('../output/ERF_best_1750-2024.csv', index_col=0)
+df = pd.read_csv('../output/ERF_best.csv', index_col=0)
 
 # %%
 SAMPLES = 100000
@@ -69,12 +69,12 @@ for variable in [
 # ## Aggregated variables
 
 # %%
-best['aerosol']     = np.zeros((275))
-best['nonco2wmghg'] = np.zeros((275))
-best['halogen']     = np.zeros((275))
-best['anthro']      = np.zeros((275))
-best['total']       = np.zeros((275))
-best['minor']       = np.zeros((275))
+best['aerosol']     = np.zeros((276))
+best['nonco2wmghg'] = np.zeros((276))
+best['halogen']     = np.zeros((276))
+best['anthro']      = np.zeros((276))
+best['total']       = np.zeros((276))
+best['minor']       = np.zeros((276))
 
 for variable in tqdm(variables):
     best['total'] = best['total'] + df[variable].values
@@ -93,12 +93,12 @@ for variable in tqdm(variables):
         best['aerosol'] = best['aerosol'] + df[variable].values
 
 # %%
-aerosol     = np.zeros((275, SAMPLES))
-nonco2wmghg = np.zeros((275, SAMPLES))
-halogen     = np.zeros((275, SAMPLES))
-anthro      = np.zeros((275, SAMPLES))
-total       = np.zeros((275, SAMPLES))
-minor       = np.zeros((275, SAMPLES))
+aerosol     = np.zeros((276, SAMPLES))
+nonco2wmghg = np.zeros((276, SAMPLES))
+halogen     = np.zeros((276, SAMPLES))
+anthro      = np.zeros((276, SAMPLES))
+total       = np.zeros((276, SAMPLES))
+minor       = np.zeros((276, SAMPLES))
 
 for variable in tqdm(variables):
     total = total + ds[variable]
@@ -117,8 +117,8 @@ for variable in tqdm(variables):
         aerosol = aerosol + ds[variable]
 
 # %%
-df_best = pd.DataFrame(best, index=np.arange(1750.5, 2025))
-df_best.to_csv('../output/ERF_best_aggregates_1750-2024.csv')
+df_best = pd.DataFrame(best, index=np.arange(1750.5, 2026))
+df_best.to_csv('../output/ERF_best_aggregates.csv')
 
 # %%
 unc['aerosol'] = np.percentile(aerosol, (5, 95), axis=1)
@@ -129,10 +129,10 @@ unc['total'] = np.percentile(total, (5, 95), axis=1)
 unc['minor'] = np.percentile(minor, (5, 95), axis=1)
 
 # %%
-df_p05 = pd.DataFrame({key: value[0] for key, value in unc.items()}, index=np.arange(1750.5, 2025))
-df_p05.to_csv('../output/ERF_p05_aggregates_1750-2024.csv')
-df_p05 = pd.DataFrame({key: value[1] for key, value in unc.items()}, index=np.arange(1750.5, 2025))
-df_p05.to_csv('../output/ERF_p95_aggregates_1750-2024.csv')
+df_p05 = pd.DataFrame({key: value[0] for key, value in unc.items()}, index=np.arange(1750.5, 2026))
+df_p05.to_csv('../output/ERF_p05_aggregates.csv')
+df_p05 = pd.DataFrame({key: value[1] for key, value in unc.items()}, index=np.arange(1750.5, 2026))
+df_p05.to_csv('../output/ERF_p95_aggregates.csv')
 
 # %%
 pl.rcParams['figure.figsize'] = (18/2.54, 10/2.54)
@@ -181,11 +181,11 @@ ax.axhline(-6.5, color='k', lw=0.6)
 ax.axhline(-7.5, color='k', lw=0.6)
 ax.set_yticks(np.arange(-8,1));
 #ax.set_xticks(np.arange(-2,4.2,1));
-ax.set_xlim(-2.2,3.81)
+ax.set_xlim(-2.0,4.01)
 ax.set_xlabel('Effective radiative forcing (W m$^{-2}$)')
 ax.set_title('')
 ax.set_yticklabels(['Carbon dioxide','Other well-mixed\ngreenhouse gases','Ozone','Stratospheric\nwater vapour', 'Albedo', 'Contrails & aviation-\ninduced cirrus', 'Aerosols','Total anthropogenic', 'Solar'][::-1]);
-ax.set_title('(a) Effective radiative forcing from 1750 to 2024')
+ax.set_title('(a) Effective radiative forcing from 1750 to 2025')
 
 
 # values
@@ -216,8 +216,8 @@ ax_values.set_xticks([]);
 
 pl.tight_layout()
 os.makedirs('../plots', exist_ok=True)
-pl.savefig('../plots/ERF_1750-2024.png')
-pl.savefig('../plots/ERF_1750-2024.pdf')
+pl.savefig('../plots/ERF.png')
+pl.savefig('../plots/ERF.pdf')
 
 # %%
 pl.rcParams['figure.figsize'] = (18/2.54, 9/2.54)
@@ -234,7 +234,7 @@ pl.rcParams['ytick.major.size'] = 3
 # %%
 fig, ax = pl.subplots()
 
-year = np.arange(1750, 2025)
+year = np.arange(1750, 2026)
 
 species = ['CO2', 'CH4', 'N2O', 'halogen', 'O3', 'aerosol', 'minor', 'volcanic', 'solar', 'total']
 
@@ -269,7 +269,7 @@ labels = {
 for specie in species:
     ax.plot(year, best[specie], color=colors[specie], lw=1, label=labels[specie])
 
-ax.fill_between(np.arange(2020, 2025), -5, 5, color="#e0e0e0")
+ax.fill_between(np.arange(2020, 2026), -5, 5, color="#e0e0e0")
 
 ax.fill_between(year, unc['anthro'][0,:], unc['anthro'][1,:], color=colors['anthro'], alpha=0.3, lw=0, label='Total anthropogenic 90% range')
 ax.plot(year, best['anthro'], color=colors['anthro'], lw=2, label=labels['anthro'])  
@@ -279,18 +279,18 @@ ax.plot(0, 0, color='None', lw=0, label='\n')
 
 
 ax.axhline(0, color='k', ls=':', lw=1)
-ax.set_xlim(1750,2024)
+ax.set_xlim(1750,2025)
 ax.set_ylim(-2.5, 4)
 
 ax.legend(ncol=2, fontsize=7, frameon=False)
 
-ax.set_title('(b) Time evolution of effective radiative forcing 1750-2024')
+ax.set_title('(b) Time evolution of effective radiative forcing 1750-2025')
 ax.set_ylabel('W m$^{-2}$')
 
 pl.tight_layout()
 os.makedirs('../plots', exist_ok=True)
-pl.savefig('../plots/ERF_timeseries_1750-2024.png')
-pl.savefig('../plots/ERF_timeseries_1750-2024.pdf')
+pl.savefig('../plots/ERF_timeseries.png')
+pl.savefig('../plots/ERF_timeseries.pdf')
 
 # %%
 ds.close()

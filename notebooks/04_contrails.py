@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.6
+#       jupytext_version: 1.19.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -21,9 +21,12 @@
 #
 # - Sausen and Schumann (2000) for the 1940-1970 period.
 #   
-# - IEA World Oil Statistics, Edition 2024, for World region and the sum of DAVGAS, DJETGAS and DJETKERO. We use data for 1971-2022. This is paywalled data so we do not include it in the repository. It is from https://www.iea.org/data-and-statistics/data-product/oil-information#world-oil-statistics. It is put into a CSV form for reading into this repository.
+# - IEA World Oil Statistics, Edition 2024, for World region and the sum of AVIATION_GASOLINE (formerly DAVGAS), GASOLINE_JET (formerly DJETGAS) and KEROSENE_JET (formerly DJETKERO) from the file OIWORLD.txt. We use data for 1971-2023. This is paywalled data so we do not include it in the repository. It is from https://www.iea.org/data-and-statistics/data-product/oil-information#world-oil-statistics. It is put into a CSV form for reading into this repository which is not included in the repo due to the licensing requirements.
 #
-# - IATA (2024), aviation fuel use, table 7 of https://www.iata.org/en/iata-repository/publications/economic-reports/global-outlook-for-air-transport-december-2024/. This data is available to 2024 as an estimate and 2025 as a projection. It could fully replace the IEA data, but we continue to use IEA to follow Lee. Annoyingly, they decide to switch from litres to gallons in 2024 (why??? nobody uses imperial units now!)
+# - IATA (2024), aviation fuel use, table 7 of https://www.iata.org/en/iata-repository/publications/economic-reports/global-outlook-for-air-transport-december-2024/. This data is available to 2024 as an estimate and 2025 as a projection. It could fully replace the IEA data, but we continue to use IEA to follow Lee. Annoyingly, they decide to switch from litres to gallons in 2024.
+#
+#
+# **New this year**: scaling up the IATA emissions by the ratio of IEA to IATA over 2019-2023, since IATA is consistently lower.
 
 # %% [markdown]
 # In Lee et al. (2020), contrail ERF is calculated as:
@@ -58,7 +61,11 @@ kg_co2_per_kg_fuel = 3.16
 us_gallons_to_litres = 3.78541
 
 # %%
-iata = pd.DataFrame(np.array([96, 52, 62, 76, 92, 101, 107]) * 1e9 * us_gallons_to_litres, index=pd.Index(np.arange(2019, 2026), name='year'), columns=['Aviation fuel, litres'])
+iata = pd.DataFrame(
+    np.array([96, 52, 62, 76, 92, 99, 103, 106]) * 1e9 * us_gallons_to_litres, 
+    index=pd.Index(np.arange(2019, 2027), name='year'), 
+    columns=['Aviation fuel, litres']
+)
 
 # %%
 iata
@@ -71,7 +78,7 @@ iata['Aviation emissions, MtCO2/yr'] = iata['Aviation fuel, kg'] * kg_co2_per_kg
 iata
 
 # %%
-iea = pd.read_csv('../data/contrails/OIWORLD-2024.csv', index_col="year")
+iea = pd.read_csv('../data/contrails/OIWORLD-2025.csv', index_col="year")
 iea['Aviation fuel, kg'] = iea['Aviation fuel, kilotons'] * 1e6
 iea['Aviation emissions, MtCO2/yr'] = iea['Aviation fuel, kg'] * kg_co2_per_kg_fuel / 1e9
 iea
@@ -92,18 +99,35 @@ lee2020 = pd.read_csv('../data/contrails/lee2020_clean_data.csv', index_col=0)
 lee2020.rename(columns={'CO2 Tg/yr': 'Aviation emissions, MtCO2/yr'}, inplace=True)
 
 # %%
-pl.plot(sausen_schumann['Aviation emissions, MtCO2/yr'])
-pl.plot(iea['Aviation emissions, MtCO2/yr'])
-pl.plot(lee2020['Aviation emissions, MtCO2/yr'])
-pl.plot(iata['Aviation emissions, MtCO2/yr'])
+pl.plot(sausen_schumann['Aviation emissions, MtCO2/yr'], label="Sausen and Schuman")
+pl.plot(lee2020['Aviation emissions, MtCO2/yr'], label="Lee et al.")
+pl.plot(iea['Aviation emissions, MtCO2/yr'], label="IEA")
+pl.plot(iata['Aviation emissions, MtCO2/yr'], label="IATA")
+pl.legend()
 
 # %%
-constructed_emissions = pd.DataFrame(np.ones(95)*np.nan, index=pd.Index(np.arange(1930, 2025), name='year'), columns=['MtCO2/yr'])
+iea.loc[2019:2023, 'Aviation emissions, MtCO2/yr']
+
+# %%
+iata.loc[2019:2023, 'Aviation emissions, MtCO2/yr']
+
+# %%
+iea.loc[2019:2023, 'Aviation emissions, MtCO2/yr']/iata.loc[2019:2023, 'Aviation emissions, MtCO2/yr']
+
+# %%
+iea.loc[2019:2023, 'Aviation emissions, MtCO2/yr']-iata.loc[2019:2023, 'Aviation emissions, MtCO2/yr']
+
+# %%
+iea_iata_factor = (iea.loc[2019:2023, 'Aviation emissions, MtCO2/yr']/iata.loc[2019:2023, 'Aviation emissions, MtCO2/yr']).mean()
+iea_iata_factor
+
+# %%
+constructed_emissions = pd.DataFrame(np.ones(96)*np.nan, index=pd.Index(np.arange(1930, 2026), name='year'), columns=['MtCO2/yr'])
 
 # %%
 constructed_emissions.loc[1940:1970, 'MtCO2/yr'] = sausen_schumann.loc[1940:1970, 'Aviation emissions, MtCO2/yr']
-constructed_emissions.loc[1971:2022, 'MtCO2/yr'] = iea.loc[1971:2022, 'Aviation emissions, MtCO2/yr']
-constructed_emissions.loc[2023:2024, 'MtCO2/yr'] = iata.loc[2023:2024, 'Aviation emissions, MtCO2/yr']
+constructed_emissions.loc[1971:2023, 'MtCO2/yr'] = iea.loc[1971:2023, 'Aviation emissions, MtCO2/yr']
+constructed_emissions.loc[2024:2025, 'MtCO2/yr'] = iata.loc[2024:2025, 'Aviation emissions, MtCO2/yr'] * iea_iata_factor
 constructed_emissions.loc[1930, 'MtCO2/yr'] = 0
 constructed_emissions.interpolate(inplace=True)
 
@@ -116,7 +140,7 @@ pl.title('Fuel efficiency')
 pl.ylabel('km / kgCO2')
 
 # %%
-constructed_efficiency = pd.DataFrame(np.ones(95) * np.nan, index=pd.Index(np.arange(1930, 2025), name='year'), columns=['km / kgCO2'])
+constructed_efficiency = pd.DataFrame(np.ones(96) * np.nan, index=pd.Index(np.arange(1930, 2026), name='year'), columns=['km / kgCO2'])
 constructed_efficiency.loc[1990:2018, 'km / kgCO2'] = lee2020['Scaled distance million km']/lee2020['Aviation emissions, MtCO2/yr']/ 1000
 #constructed_efficiency[2019] = 
 # For 2019 to 2022, take estimates of distance from https://www.airlines.org/dataset/world-airlines-traffic-and-capacity/
@@ -125,10 +149,11 @@ constructed_efficiency.loc[2019, 'km / kgCO2'] = 1.17 * 56199 / iea.loc[2019, 'A
 constructed_efficiency.loc[2020, 'km / kgCO2'] = 1.17 * 28013 / iea.loc[2020, 'Aviation emissions, MtCO2/yr'] / 1000
 constructed_efficiency.loc[2021, 'km / kgCO2'] = 1.17 * 33705 / iea.loc[2021, 'Aviation emissions, MtCO2/yr'] / 1000
 constructed_efficiency.loc[2022, 'km / kgCO2'] = 1.17 * 42801 / iea.loc[2022, 'Aviation emissions, MtCO2/yr'] / 1000
+constructed_efficiency.loc[2023, 'km / kgCO2'] = 1.17 * 53873 / iea.loc[2023, 'Aviation emissions, MtCO2/yr'] / 1000
 
-# for 2023 and 2024, we have no better means than using 2022 data. But really, we'd expect efficiency to improve, since there were probably
+# for 2024 and 2025, we have no better means than using 2022 data. But really, we'd expect efficiency to improve, since there were probably
 # fewer half-empty planes after COVID.
-constructed_efficiency.loc[2023:2024, 'km / kgCO2'] = constructed_efficiency.loc[2022, 'km / kgCO2']
+constructed_efficiency.loc[2024:2025, 'km / kgCO2'] = constructed_efficiency.loc[2023, 'km / kgCO2']
 
 # %% [markdown]
 # Now try to port this backwards
@@ -155,25 +180,25 @@ pl.plot(constructed_efficiency)
 constructed_efficiency
 
 # %%
-constructed_scaled_distance = pd.DataFrame(np.ones(95) * np.nan, index=pd.Index(np.arange(1930, 2025), name='year'), columns=['Scaled distance, km'])
-constructed_scaled_distance.loc[1930:2024, 'Scaled distance, km'] = (constructed_emissions.values * constructed_efficiency.values).squeeze() * 1e9
+constructed_scaled_distance = pd.DataFrame(np.ones(96) * np.nan, index=pd.Index(np.arange(1930, 2026), name='year'), columns=['Scaled distance, km'])
+constructed_scaled_distance.loc[1930:2025, 'Scaled distance, km'] = (constructed_emissions.values * constructed_efficiency.values).squeeze() * 1e9
 pl.plot(constructed_scaled_distance)
 
 # %%
 lee_conversion_km_to_contrail_erf = 9.3595037832885E-13  # cell J73 of supplementary Excel, divide by 1000 to convert milliwatts to watts
 
 # %%
-# Do we keep the 2018 value in Lee (0.0574) by scaling this, or use the slightly newer data from IEA? TBF it is the same to 3 d.p.
+# Do we keep the 2018 value in Lee (0.0574) by scaling this, or use the slightly newer data from IEA?
 constructed_scaled_distance.loc[2018, 'Scaled distance, km'] * lee_conversion_km_to_contrail_erf
 
 # %%
 # contrail forcing ERF
-contrails_erf = pd.DataFrame(np.ones(95) * np.nan, index=pd.Index(np.arange(1930, 2025), name='year'), columns=['Contrails ERF, W/m2'])
-contrails_erf.loc[1930:2024, 'Contrails ERF, W/m2'] = (constructed_scaled_distance * lee_conversion_km_to_contrail_erf).values.squeeze()
+contrails_erf = pd.DataFrame(np.ones(96) * np.nan, index=pd.Index(np.arange(1930, 2026), name='year'), columns=['Contrails ERF, W/m2'])
+contrails_erf.loc[1930:2025, 'Contrails ERF, W/m2'] = (constructed_scaled_distance * lee_conversion_km_to_contrail_erf).values.squeeze()
 
 pl.plot(contrails_erf)
 
 # %%
-contrails_erf.to_csv('../output/contrails_ERF_1930-2024.csv')
+contrails_erf.to_csv('../output/contrails_ERF.csv')
 
 # %%
