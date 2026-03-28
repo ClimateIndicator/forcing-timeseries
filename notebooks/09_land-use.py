@@ -65,6 +65,21 @@ df_irr = pd.read_csv('../data/land_use/Irrigation_ERF_Wells_FAO.csv', index_col=
 df_irr
 
 # %%
+df_irr_isimip2b = pd.read_csv('../data/land_use/erf_irrigation_2b.csv', index_col=0)
+df_irr_isimip2b
+
+# %%
+df_irr_isimip2b.columns
+
+# %%
+pl.plot(df_irr)
+pl.plot(df_irr_isimip2b['AVERAGE_median'])
+
+# %%
+pl.plot(df_irr.loc[2013:])
+pl.plot(df_irr_isimip2b.loc[2013:2030, 'AVERAGE_median'])
+
+# %%
 lr = linregress(df_irr.loc[2013:].index, df_irr.loc[2013:, "Irrigation ERF"])
 
 # %%
@@ -72,15 +87,16 @@ pl.plot(df_irr.loc[2013:])
 pl.plot(np.arange(2013, 2026), lr.slope * np.arange(2013, 2026) + lr.intercept)
 
 # %%
-df_irr.loc[2023, "Irrigation ERF"] = lr.slope * 2023 + lr.intercept
-df_irr.loc[2024, "Irrigation ERF"] = lr.slope * 2024 + lr.intercept
-df_irr.loc[2025, "Irrigation ERF"] = lr.slope * 2025 + lr.intercept
+# persistence might be safest bet
+# df_irr.loc[2023, "Irrigation ERF"] = lr.slope * 2023 + lr.intercept
+df_irr.loc[2024, "Irrigation ERF"] = df_irr.loc[2023, "Irrigation ERF"]
+df_irr.loc[2025, "Irrigation ERF"] = df_irr.loc[2023, "Irrigation ERF"]
 
 # %%
-pl.plot(df_irr)
+df_irr
 
 # %%
-df_landuse.loc[1750:2025, 'irrigation'] = df_irr.values
+df_landuse.loc[1750:2025, 'irrigation'] = df_irr.loc[1750:2025, "Irrigation ERF"].values
 
 # %%
 df_landuse['total'] = df_landuse['gcb-2025_rescaled'] + df_landuse['irrigation']
