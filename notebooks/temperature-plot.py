@@ -28,7 +28,7 @@ import os
 os.makedirs('../plots', exist_ok=True)
 
 # %%
-df_gmst = pd.read_csv('../data/gmst/IGCC_GMST_1850-2025.csv')
+df_gmst = pd.read_csv('../data/gmst/IGCC_GMST_1850-2024.csv')
 
 # %%
 df_gmst
@@ -55,10 +55,10 @@ pl.rcParams['figure.dpi'] = 150
 # %%
 pl.plot(df_gmst.year, df_gmst.gmst, lw=1, color='r')
 pl.plot(df_gmst_10.year, df_gmst_10.gmst, lw=2.5, color='k')
-pl.xlim(1850, 2026)
+pl.xlim(1850, 2025)
 pl.ylabel('Temperature anomaly\nrelative to 1850-1900 (°C)')
 pl.tight_layout()
-pl.savefig('../plots/gmst2026.png')
-pl.savefig('../plots/gmst2026.pdf')
+pl.savefig('../plots/gmst.png')
+pl.savefig('../plots/gmst.pdf')
 
 # %%

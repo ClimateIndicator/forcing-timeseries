@@ -27,7 +27,7 @@ from fair.interface import fill, initialise
 # %%
 # leverage fair's concentrations to emissions routines and include all minor species in concentration time series
 f = FAIR(temperature_prescribed=True)
-f.define_time(1750, 2025, 1)
+f.define_time(1750, 2024, 1)
 f.define_scenarios(["historical"])
 f.define_configs(["historical"])
 species = [
@@ -101,7 +101,7 @@ f.define_species(species, properties)
 f.allocate()
 
 # %%
-df_conc_obs=pd.read_csv('../output/ghg_concentrations.csv', index_col=0)
+df_conc_obs=pd.read_csv('../output/ghg_concentrations_1750-2024.csv', index_col=0)
 
 # %%
 for year in range(1751, 1850):
@@ -113,14 +113,14 @@ df_conc_obs.interpolate(inplace=True)
 for specie in species:
     f.concentration.loc[
         dict(
-            timebounds=slice(1751, 2026),
+            timebounds=slice(1751, 2025),
             specie=specie,
             scenario="historical",
             config="historical",
         )
     ] = 0.5 * (
-        df_conc_obs.loc[1750:2024, specie].values
-        + df_conc_obs.loc[1751:2025, specie].values
+        df_conc_obs.loc[1750:2023, specie].values
+        + df_conc_obs.loc[1751:2024, specie].values
     )
     f.concentration.loc[
         dict(
