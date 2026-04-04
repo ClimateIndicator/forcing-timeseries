@@ -15,18 +15,10 @@
 # %% [markdown]
 # # Update IPCC AR6 ERF timeseries
 #
-# - with updated data through 2024
+# with updated data through 2025
 #
-# **NOTE**: we continue to use CMIP6 solar forcing, because
-#
-# 1. CMIP7 does not go back before 1850;
-# 2. CMIP7 historical ends in 2023, and no future dataset is yet prescribed (see https://solarisheppa.geomar.de/cmip7)
-#
-# 2024 differences compared to 2023:
-# - using CAMS to extend CEDS to 2024
-# - water vapour from HTHH is an estimate for 2024
-# - stratospheric water vapour scales with methane concentrations not methane forcing
-# - land use change is from LUH2 + GCB2024 for albedo and FAO for irrigation, replacing the cumulative CO2 AFOLU estimate **and we also update the uncertainties to take into account the separate assessments on these ranges** - this is a big improvement, thanks to Thomas Gasser and Chris Wells
+# 2025 differences compared to 2024:
+# - solar forcing is from CMIP7 and CDR-TSI
 
 # %%
 import copy
@@ -61,11 +53,11 @@ with open('../data/random_seeds.json', 'r') as filehandle:
     SEEDS = json.load(filehandle)
 
 # %%
-emissions = pd.read_csv('../output/slcf_emissions_1750-2024.csv', index_col=0)
+emissions = pd.read_csv('../output/slcf_emissions.csv', index_col=0)
 emissions
 
 # %%
-concentrations = pd.read_csv('../output/ghg_concentrations_1750-2024.csv', index_col=0)
+concentrations = pd.read_csv('../output/ghg_concentrations.csv', index_col=0)
 for year in range(1751, 1850):
     concentrations.loc[year, :] = np.nan
 concentrations.sort_index(inplace=True)
@@ -214,18 +206,18 @@ pl.hist(scale_df['irrigation'], bins=50)
 # On top of this we add a linear trend from 1750 to 2019 based on the PD uncertainty assessment of +/- 0.07 W m-2.
 
 # %%
-df_solar = pd.read_csv('../data/ar6/solar_erf.csv', index_col=0)
-forcing['solar'] = df_solar.loc[1750:2024].values.squeeze()
+df_solar = pd.read_csv('../output/solar_tsi_erf.csv', index_col=0)
+forcing['solar'] = df_solar.loc[1750:2025, 'erf'].values.squeeze()
 
 # %%
-df_solar.loc[2019:2024]
+df_solar.loc[2019:2025]
 
 # %%
 df_solar.loc[2009:2019].mean()  # cycle 24 was Dec 2008 to Dec 2019: https://en.wikipedia.org/wiki/Solar_cycle_24
 
 # %%
-# as AR6, trend extended to 2024, but with 2019 end
-trend = np.ones(275)
+# as AR6, trend extended to 2025, but with 2019 end
+trend = np.ones(276)
 trend[:270] = np.linspace(0, 1, 270)
 
 # %%
@@ -237,8 +229,8 @@ forcing_ensemble['solar'] = trend[:,None] * trend_solar[None,:] + forcing['solar
 # Calculated in a previous notebook
 
 # %%
-df_volcanic = pd.read_csv('../output/volcanic_sAOD_ERF_annual_-9500-2024.csv', index_col=0)
-forcing['volcanic'] = df_volcanic.loc[1750.5:2024.5, 'volcanic_ERF'].values.squeeze()
+df_volcanic = pd.read_csv('../output/volcanic_sAOD_ERF_annual.csv', index_col=0)
+forcing['volcanic'] = df_volcanic.loc[1750.5:2025.5, 'volcanic_ERF'].values.squeeze()
 
 # %% [markdown]
 # ### Aerosol forcing
@@ -353,7 +345,7 @@ br_atoms = {
 }
 
 hc_eesc = {}
-total_eesc = np.zeros(275)
+total_eesc = np.zeros(276)
 for species in cl_atoms:
     hc_eesc[species] = calculate_eesc(
         concentrations.loc[:, species],
@@ -454,7 +446,7 @@ emnump = emissions.drop(columns=['CO', 'CH4', 'N2O']).to_numpy()
 emissions
 
 # %%
-forcing_ensemble['aerosol-radiation_interactions'] = np.zeros((275, SAMPLES))
+forcing_ensemble['aerosol-radiation_interactions'] = np.zeros((276, SAMPLES))
 for i in tqdm(range(SAMPLES)):
     forcing_ensemble['aerosol-radiation_interactions'][:, i] = (
         (
@@ -524,7 +516,7 @@ def aci_log(x, beta, n0, n1, n2):
 
 
 # %%
-forcing_ensemble['aerosol-cloud_interactions'] = np.zeros((275, SAMPLES))
+forcing_ensemble['aerosol-cloud_interactions'] = np.zeros((276, SAMPLES))
 for i in tqdm(range(SAMPLES), desc="aci samples"):
     ts2010 = np.mean(
         aci_log(
@@ -581,8 +573,8 @@ pl.plot(forcing['aerosol-radiation_interactions'] + forcing['aerosol-cloud_inter
 # Use result from previous notebook
 
 # %%
-df_contrails = pd.read_csv('../output/contrails_ERF_1930-2024.csv', index_col=0)
-forcing['contrails'] = np.zeros(275)
+df_contrails = pd.read_csv('../output/contrails_ERF.csv', index_col=0)
+forcing['contrails'] = np.zeros(276)
 forcing['contrails'][180:] = df_contrails.values.squeeze()
 
 # %% [markdown]
@@ -593,25 +585,25 @@ forcing['contrails'][180:] = df_contrails.values.squeeze()
 # Also compare to cumulative land use CO2 emissions, scale to -0.2 W/m2 for 1750 to 2019 (the old way of doing things)
 
 # %%
-df_gcp = pd.read_csv('../data/gcp_emissions/gcp_2024.csv', index_col=0)
-df_luprocess = pd.read_csv('../output/land_use_1750-2024.csv', index_col=0)
+#df_gcp = pd.read_csv('../data/gcp_emissions/gcp_2024.csv', index_col=0)
+df_luprocess = pd.read_csv('../output/land_use.csv', index_col=0)
 
 # %%
-df_gcp['AFOLU']
+#df_gcp['AFOLU']
 
 # %%
 df_luprocess
 
 # %%
-lusf2019 = -0.20/(np.cumsum(df_gcp['AFOLU']).loc[2019] - df_gcp.loc[1750, 'AFOLU'])
-lusf2019
+# lusf2019 = -0.20/(np.cumsum(df_gcp['AFOLU']).loc[2019] - df_gcp.loc[1750, 'AFOLU'])
+# lusf2019
 
 # %%
-forcing['land_use'] = df_luprocess['total'].values
-landuse_from_co2_afolu = (np.cumsum(df_gcp['AFOLU']) - df_gcp.loc[1750, 'AFOLU']).values*lusf2019
+forcing['land_use'] = df_luprocess.loc[1750:2025, 'total'].values
+# landuse_from_co2_afolu = (np.cumsum(df_gcp['AFOLU']) - df_gcp.loc[1750, 'AFOLU']).values*lusf2019
 
 # %%
-pl.plot(landuse_from_co2_afolu)
+#pl.plot(landuse_from_co2_afolu)
 pl.plot(forcing['land_use'])
 
 # %% [markdown]
@@ -746,8 +738,8 @@ ghg_forcing_offset = meinshausen2020(
 ghg_forcing_offset
 
 # %%
-ghg_out = np.zeros((275, 52))
-for i, year in enumerate(range(1750, 2025)):
+ghg_out = np.zeros((276, 52))
+for i, year in enumerate(range(1750, 2026)):
     ghg_out[i, :] = meinshausen2020(
         concentrations.loc[year].values,
         forcing_reference_concentration,
@@ -946,7 +938,7 @@ forcing['O3'] = (
 ).values.squeeze()
 
 # %%
-pl.plot(np.arange(1750, 2025), forcing['O3'], label='ozone precursor best fit')
+pl.plot(np.arange(1750, 2026), forcing['O3'], label='ozone precursor best fit')
 pl.plot(np.arange(1750, 2021), o3total, label='Skeie et al. (historical + SSP2-4.5)')
 pl.legend()
 
@@ -969,12 +961,12 @@ forcing['H2O_stratospheric']
 type(forcing['H2O_stratospheric']) == pd.core.series.Series
 
 # %%
-pd.DataFrame(forcing, index=np.arange(1750, 2025)).to_csv('../output/ERF_best_1750-2024.csv')
+pd.DataFrame(forcing, index=np.arange(1750, 2026)).to_csv('../output/ERF_best.csv')
 
 # %%
 # aggregate land use first
-irr_ensemble = df_luprocess['irrigation'].values[:, None] * scale_df['irrigation'].values[None,:]
-lu_ensemble = df_luprocess['LUH2-GCB2024_rescaled'].values[:, None] * scale_df['land_albedo'].values[None,:]
+irr_ensemble = df_luprocess.loc[1750:2025, 'irrigation'].values[:, None] * scale_df['irrigation'].values[None,:]
+lu_ensemble = df_luprocess.loc[1750:2025, 'gcb-2025_rescaled'].values[:, None] * scale_df['land_albedo'].values[None,:]
 
 # %%
 forcing_ensemble['land_use'] = irr_ensemble + lu_ensemble
@@ -990,11 +982,11 @@ for agent in tqdm(forcing):
 forcing_ensemble
 
 # %%
-forcing_ensemble_sum = np.zeros((275, SAMPLES))
-forcing_ensemble_anthro = np.zeros((275, SAMPLES))
-forcing_ensemble_natural = np.zeros((275, SAMPLES))
-forcing_ensemble_aerosol = np.zeros((275, SAMPLES))
-forcing_ensemble_minorghg = np.zeros((275, SAMPLES))
+forcing_ensemble_sum = np.zeros((276, SAMPLES))
+forcing_ensemble_anthro = np.zeros((276, SAMPLES))
+forcing_ensemble_natural = np.zeros((276, SAMPLES))
+forcing_ensemble_aerosol = np.zeros((276, SAMPLES))
+forcing_ensemble_minorghg = np.zeros((276, SAMPLES))
 
 for agent in tqdm(forcing):
     forcing_ensemble_sum = forcing_ensemble_sum + forcing_ensemble[agent]
@@ -1009,11 +1001,11 @@ for agent in tqdm(forcing):
         forcing_ensemble_aerosol = forcing_ensemble_aerosol + forcing_ensemble[agent]
 
 # %%
-forcing_sum = np.zeros((275))
-forcing_anthro = np.zeros((275))
-forcing_natural = np.zeros((275))
-forcing_aerosol = np.zeros((275))
-forcing_minorghg = np.zeros((275))
+forcing_sum = np.zeros((276))
+forcing_anthro = np.zeros((276))
+forcing_natural = np.zeros((276))
+forcing_aerosol = np.zeros((276))
+forcing_minorghg = np.zeros((276))
 
 for agent in tqdm(forcing):
     forcing_sum = forcing_sum + forcing[agent]
@@ -1049,54 +1041,54 @@ forcing_p95_minorghg = np.percentile(forcing_ensemble_minorghg,95,axis=1)
 
 # %%
 fig, ax = pl.subplots(4,4, figsize=(16,16),squeeze=True)
-ax[0,0].fill_between(np.arange(1750,2025), forcing_p05['CO2'], forcing_p95['CO2'], alpha=0.3)
-ax[0,0].plot(np.arange(1750,2025),forcing['CO2'])
+ax[0,0].fill_between(np.arange(1750,2026), forcing_p05['CO2'], forcing_p95['CO2'], alpha=0.3)
+ax[0,0].plot(np.arange(1750,2026),forcing['CO2'])
 ax[0,0].set_title('CO2')
-ax[0,1].fill_between(np.arange(1750,2025), forcing_p05['CH4'], forcing_p95['CH4'], alpha=0.3)
-ax[0,1].plot(np.arange(1750,2025),forcing['CH4'])
+ax[0,1].fill_between(np.arange(1750,2026), forcing_p05['CH4'], forcing_p95['CH4'], alpha=0.3)
+ax[0,1].plot(np.arange(1750,2026),forcing['CH4'])
 ax[0,1].set_title('CH4')
-ax[0,2].fill_between(np.arange(1750,2025), forcing_p05['N2O'], forcing_p95['N2O'], alpha=0.3)
-ax[0,2].plot(np.arange(1750,2025),forcing['N2O'])
+ax[0,2].fill_between(np.arange(1750,2026), forcing_p05['N2O'], forcing_p95['N2O'], alpha=0.3)
+ax[0,2].plot(np.arange(1750,2026),forcing['N2O'])
 ax[0,2].set_title('N2O')
-ax[0,3].fill_between(np.arange(1750,2025), forcing_p05_minorghg, forcing_p95_minorghg, alpha=0.3)
-ax[0,3].plot(np.arange(1750,2025),forcing_minorghg)
+ax[0,3].fill_between(np.arange(1750,2026), forcing_p05_minorghg, forcing_p95_minorghg, alpha=0.3)
+ax[0,3].plot(np.arange(1750,2026),forcing_minorghg)
 ax[0,3].set_title('Other WMGHGs')
-ax[1,0].fill_between(np.arange(1750,2025), forcing_p05['O3'], forcing_p95['O3'], alpha=0.3)
-ax[1,0].plot(np.arange(1750,2025),forcing['O3'])
+ax[1,0].fill_between(np.arange(1750,2026), forcing_p05['O3'], forcing_p95['O3'], alpha=0.3)
+ax[1,0].plot(np.arange(1750,2026),forcing['O3'])
 ax[1,0].set_title('O3')
-ax[1,1].fill_between(np.arange(1750,2025), forcing_p05['H2O_stratospheric'], forcing_p95['H2O_stratospheric'], alpha=0.3)
-ax[1,1].plot(np.arange(1750,2025),forcing['H2O_stratospheric'])
+ax[1,1].fill_between(np.arange(1750,2026), forcing_p05['H2O_stratospheric'], forcing_p95['H2O_stratospheric'], alpha=0.3)
+ax[1,1].plot(np.arange(1750,2026),forcing['H2O_stratospheric'])
 ax[1,1].set_title('H2O stratospheric')
-ax[1,2].fill_between(np.arange(1750,2025), forcing_p05['contrails'], forcing_p95['contrails'], alpha=0.3)
-ax[1,2].plot(np.arange(1750,2025),forcing['contrails'])
+ax[1,2].fill_between(np.arange(1750,2026), forcing_p05['contrails'], forcing_p95['contrails'], alpha=0.3)
+ax[1,2].plot(np.arange(1750,2026),forcing['contrails'])
 ax[1,2].set_title('contrails')
-ax[1,3].fill_between(np.arange(1750,2025), forcing_p05['aerosol-radiation_interactions'], forcing_p95['aerosol-radiation_interactions'], alpha=0.3)
-ax[1,3].plot(np.arange(1750,2025),forcing['aerosol-radiation_interactions'])
+ax[1,3].fill_between(np.arange(1750,2026), forcing_p05['aerosol-radiation_interactions'], forcing_p95['aerosol-radiation_interactions'], alpha=0.3)
+ax[1,3].plot(np.arange(1750,2026),forcing['aerosol-radiation_interactions'])
 ax[1,3].set_title('ERFari')
-ax[2,0].fill_between(np.arange(1750,2025), forcing_p05['aerosol-cloud_interactions'], forcing_p95['aerosol-cloud_interactions'], alpha=0.3)
-ax[2,0].plot(np.arange(1750,2025),forcing['aerosol-cloud_interactions'])
+ax[2,0].fill_between(np.arange(1750,2026), forcing_p05['aerosol-cloud_interactions'], forcing_p95['aerosol-cloud_interactions'], alpha=0.3)
+ax[2,0].plot(np.arange(1750,2026),forcing['aerosol-cloud_interactions'])
 ax[2,0].set_title('ERFaci')
-ax[2,1].fill_between(np.arange(1750,2025), forcing_p05['BC_on_snow'], forcing_p95['BC_on_snow'], alpha=0.3)
-ax[2,1].plot(np.arange(1750,2025),forcing['BC_on_snow'])
+ax[2,1].fill_between(np.arange(1750,2026), forcing_p05['BC_on_snow'], forcing_p95['BC_on_snow'], alpha=0.3)
+ax[2,1].plot(np.arange(1750,2026),forcing['BC_on_snow'])
 ax[2,1].set_title('BC on snow')
-ax[2,2].fill_between(np.arange(1750,2025), forcing_p05['land_use'], forcing_p95['land_use'], alpha=0.3)
-ax[2,2].plot(np.arange(1750,2025),forcing['land_use'])
+ax[2,2].fill_between(np.arange(1750,2026), forcing_p05['land_use'], forcing_p95['land_use'], alpha=0.3)
+ax[2,2].plot(np.arange(1750,2026),forcing['land_use'])
 ax[2,2].set_title('land use')
-ax[2,3].fill_between(np.arange(1750,2025), forcing_p05['volcanic'], forcing_p95['volcanic'], alpha=0.3)
-ax[2,3].plot(np.arange(1750,2025),forcing['volcanic'])
+ax[2,3].fill_between(np.arange(1750,2026), forcing_p05['volcanic'], forcing_p95['volcanic'], alpha=0.3)
+ax[2,3].plot(np.arange(1750,2026),forcing['volcanic'])
 ax[2,3].set_title('volcanic')
-ax[3,0].fill_between(np.arange(1750,2025), forcing_p05['solar'], forcing_p95['solar'], alpha=0.3)
-ax[3,0].plot(np.arange(1750,2025),forcing['solar'])
+ax[3,0].fill_between(np.arange(1750,2026), forcing_p05['solar'], forcing_p95['solar'], alpha=0.3)
+ax[3,0].plot(np.arange(1750,2026),forcing['solar'])
 ax[3,0].set_title('solar');
 
 # %%
 pl.figure(figsize=(16,9))
-pl.fill_between(np.arange(1750,2025), forcing_p05_sum, forcing_p95_sum, alpha=0.3)
-pl.plot(np.arange(1750,2025), forcing_sum)
+pl.fill_between(np.arange(1750,2026), forcing_p05_sum, forcing_p95_sum, alpha=0.3)
+pl.plot(np.arange(1750,2026), forcing_sum)
 pl.yticks(np.arange(-4,5))
 pl.xticks(np.arange(1750,2020,50))
 pl.ylim(-4,4)
-pl.xlim(1750,2025)
+pl.xlim(1750,2026)
 pl.grid()
 
 # %%
@@ -1110,7 +1102,7 @@ for agent in forcing_ensemble:
     forcing_ensemble[agent] = xr.DataArray(
         forcing_ensemble[agent], 
         coords=dict(
-            time=np.arange(1750, 2025),
+            time=np.arange(1750, 2026),
             ensemble=np.arange(SAMPLES)
         )
     )
