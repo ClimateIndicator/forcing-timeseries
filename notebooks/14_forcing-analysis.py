@@ -38,30 +38,13 @@ import xarray as xr
 import json
 
 # %%
-pl.rcParams['figure.figsize'] = (10/2.54, 10/2.54)
-pl.rcParams['font.size'] = 11
-pl.rcParams['font.family'] = 'Arial'
-pl.rcParams['ytick.direction'] = 'in'
-pl.rcParams['ytick.minor.visible'] = True
-pl.rcParams['ytick.major.right'] = True
-pl.rcParams['ytick.right'] = True
-pl.rcParams['xtick.direction'] = 'in'
-pl.rcParams['xtick.minor.visible'] = True
-pl.rcParams['xtick.major.top'] = True
-pl.rcParams['ytick.major.left'] = True
-pl.rcParams['xtick.top'] = True
-pl.rcParams['figure.dpi'] = 150
-pl.rcParams['axes.spines.top'] = True
-pl.rcParams['axes.spines.bottom'] = True
-
-# %%
 ds = xr.load_dataset('../output/ERF_ensemble.nc')
 
 # %%
 variables = list(ds.keys())
 
 # %%
-df = pd.read_csv('../output/ERF_best.csv', index_col=0)
+df = pd.read_csv('../output/ERF_best_1750-2024.csv', index_col=0)
 
 # %%
 SAMPLES = 100000
@@ -69,7 +52,7 @@ SAMPLES = 100000
 # %% [markdown]
 # ## Non-aggregated statistics
 #
-# 2011, 2019 and 2025
+# 2011, 2019 and 2024
 
 # %%
 for variable in [
@@ -86,7 +69,7 @@ for variable in [
     'solar',
     'volcanic',
 ]:
-    print(variable, np.percentile(ds[variable].loc[dict(time=2025)], (5, 50, 95)), df.loc[2024, variable])
+    print(variable, np.percentile(ds[variable].loc[dict(time=2024)], (5, 50, 95)), df.loc[2024, variable])
 
 # %%
 # pick 1000 for export
@@ -103,12 +86,12 @@ subset = np.random.choice(np.arange(SAMPLES), 1000, replace=False)
 # and also individual categories for further DAMIP work
 
 # %%
-total_best     = np.zeros((276))
-natural_best   = np.zeros((276))
-aerosol_best   = np.zeros((276))
-wmghg_best     = np.zeros((276))
-other_ant_best = np.zeros((276))
-halogen_best   = np.zeros((276))
+total_best     = np.zeros((275))
+natural_best   = np.zeros((275))
+aerosol_best   = np.zeros((275))
+wmghg_best     = np.zeros((275))
+other_ant_best = np.zeros((275))
+halogen_best   = np.zeros((275))
 
 for variable in tqdm(variables):
     #print(variable)
@@ -140,12 +123,12 @@ df_out.to_csv('../output/ERF_best_DAMIP_1750-2024.csv')
 
 # %%
 # aggregated
-total     = np.zeros((276, SAMPLES))
-natural   = np.zeros((276, SAMPLES))
-aerosol   = np.zeros((276, SAMPLES))
-wmghg     = np.zeros((276, SAMPLES))
-other_ant = np.zeros((276, SAMPLES))
-halogen   = np.zeros((276, SAMPLES))
+total     = np.zeros((275, SAMPLES))
+natural   = np.zeros((275, SAMPLES))
+aerosol   = np.zeros((275, SAMPLES))
+wmghg     = np.zeros((275, SAMPLES))
+other_ant = np.zeros((275, SAMPLES))
+halogen   = np.zeros((275, SAMPLES))
 
 # individual
 co2       = ds['CO2']
@@ -183,68 +166,10 @@ for variable in tqdm(variables):
 # ## Show shape matters
 
 # %%
-pl.plot(np.arange(1750, 2026), aerosol[:, :1000], alpha=0.13, lw=0.5, color='g');
-pl.xlim(1750, 2030)
-pl.title('Aerosol ERF, 1000 ensemble members')
-pl.ylabel("W m$^{-2}$")
-pl.tight_layout()
-pl.savefig('../plots/aerosol_erf_1000.png')
-pl.savefig('../plots/aerosol_erf_1000.pdf')
+pl.plot(np.arange(1750, 2025), aerosol[:, :7]);
 
 # %%
-pl.fill_between(
-    np.arange(1750, 2026), 
-    np.percentile(aerosol[:, :],5,axis=1), 
-    np.percentile(aerosol[:, :],95,axis=1),
-    alpha=0.2,
-    lw=0,
-    color='g'
-)
-pl.fill_between(
-    np.arange(1750, 2026), 
-    np.percentile(aerosol[:, :],16,axis=1), 
-    np.percentile(aerosol[:, :],84,axis=1),
-    alpha=0.2,
-    lw=0,
-    color='g'
-)
-pl.plot(np.arange(1750, 2026), np.percentile(aerosol[:, :],50,axis=1), color='g');
-pl.xlim(2000, 2025)
-pl.ylim(-2.5, 0)
-pl.title('Aerosol ERF, full ensemble')
-pl.ylabel("W m$^{-2}$")
-pl.tight_layout()
-pl.savefig('../plots/aerosol_erf_since_2000.png')
-pl.savefig('../plots/aerosol_erf_since_2000.pdf')
-
-# %%
-pl.fill_between(
-    np.arange(1750, 2026), 
-    np.percentile(total[:, :],5,axis=1), 
-    np.percentile(total[:, :],95,axis=1),
-    alpha=0.2,
-    lw=0,
-    color='b'
-)
-pl.fill_between(
-    np.arange(1750, 2026), 
-    np.percentile(total[:, :],16,axis=1), 
-    np.percentile(total[:, :],84,axis=1),
-    alpha=0.2,
-    lw=0,
-    color='b'
-)
-pl.plot(np.arange(1750, 2026), np.percentile(total[:, :],50,axis=1), color='b');
-pl.xlim(2000, 2025)
-pl.ylim(0, 4.5)
-pl.title('total ERF, full ensemble')
-pl.ylabel("W m$^{-2}$")
-pl.tight_layout()
-pl.savefig('../plots/erf_since_2000.png')
-pl.savefig('../plots/erf_since_2000.pdf')
-
-# %%
-print('halogen', np.percentile(halogen[-1,:], (5, 50, 95)), halogen_best[2025])
+print('halogen', np.percentile(halogen[-1,:], (5, 50, 95)), halogen_best[2024])
 
 # %%
 print('total:        ', np.percentile(total[-1, :], (5, 50, 95)))

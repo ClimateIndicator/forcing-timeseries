@@ -28,7 +28,7 @@ import os
 os.makedirs('../plots', exist_ok=True)
 
 # %%
-df_gmst = pd.read_csv('../data/gmst/IGCC_GMST_1850-2024.csv')
+df_gmst = pd.read_csv('../data/gmst/IGCC_GMST_1850-2025.csv')
 
 # %%
 df_gmst
