@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.1
+#       jupytext_version: 1.17.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -23,7 +23,7 @@
 #   
 # - IEA World Oil Statistics, Edition 2024, for World region and the sum of AVIATION_GASOLINE (formerly DAVGAS), GASOLINE_JET (formerly DJETGAS) and KEROSENE_JET (formerly DJETKERO) from the file OIWORLD.txt. We use data for 1971-2023. This is paywalled data so we do not include it in the repository. It is from https://www.iea.org/data-and-statistics/data-product/oil-information#world-oil-statistics. It is put into a CSV form for reading into this repository which is not included in the repo due to the licensing requirements.
 #
-# - IATA (2024), aviation fuel use, table 7 of https://www.iata.org/en/iata-repository/publications/economic-reports/global-outlook-for-air-transport-december-2024/. This data is available to 2024 as an estimate and 2025 as a projection. It could fully replace the IEA data, but we continue to use IEA to follow Lee. Annoyingly, they decide to switch from litres to gallons in 2024.
+# - IATA (2025), aviation fuel use, table 7 of https://www.iata.org/en/iata-repository/publications/economic-reports/global-outlook-for-air-transport-december-2025/. This data is available to 2024 as an estimate and 2025 as a projection. It could fully replace the IEA data, but we continue to use IEA to follow Lee. Annoyingly, they decide to switch from litres to gallons in 2024.
 #
 #
 # **New this year**: scaling up the IATA emissions by the ratio of IEA to IATA over 2019-2023, since IATA is consistently lower.
