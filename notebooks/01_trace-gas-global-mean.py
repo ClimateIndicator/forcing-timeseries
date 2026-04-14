@@ -810,3 +810,17 @@ for gas in gases_montreal:
 pfc_hfc134a_eq_2024, hfc_hfc134a_eq_2024, montreal_cfc12_eq_2024
 
 # %%
+pfc_hfc134a_eq_2025 = 0
+for gas in gases_pfc:
+    pfc_hfc134a_eq_2025 = pfc_hfc134a_eq_2025 + (df_conc.loc[2025, gas] * radeff[gas] / radeff['CF4'])
+hfc_hfc134a_eq_2025 = 0
+for gas in gases_hfcs:
+    hfc_hfc134a_eq_2025 = hfc_hfc134a_eq_2025 + (df_conc.loc[2025, gas] * radeff[gas] / radeff['HFC-134a'])
+montreal_cfc12_eq_2025 = 0
+for gas in gases_montreal:
+    montreal_cfc12_eq_2025 = montreal_cfc12_eq_2025 + (df_conc.loc[2025, gas] * radeff[gas] / radeff['CFC-12'])
+
+# %%
+pfc_hfc134a_eq_2025, hfc_hfc134a_eq_2025, montreal_cfc12_eq_2025
+
+# %%

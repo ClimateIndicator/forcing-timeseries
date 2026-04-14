@@ -1,27 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 # %%
-
-# %%
-
-
 import pandas as pd
 import matplotlib.pyplot as plt
 
 
 # %%
-
-
-# Read the CSV file #2026 paper for 2025 update
-
-#2024 file='https://raw.githubusercontent.com/ClimateIndicator/forcing-timeseries/refs/heads/main/output/ghg_concentrations_1750-2024.csv'
-file='https://raw.githubusercontent.com/ClimateIndicator/forcing-timeseries/refs/heads/main/output/ghg_concentrations.csv'
+# Read the CSV file
+file='../output/ghg_concentrations.csv'
 df=pd.read_csv(file)
 
 
 # %%
-
-
 # Filter the data for CO2, CH4, and N2O concentrations and years 2000 to 2025
 data = df[(df['YYYY'] >= 2000) & (df['YYYY'] <= 2025)][['YYYY', 'CO2', 'CH4', 'N2O']]
 
@@ -31,14 +21,8 @@ pfcs = df[(df['YYYY'] >= 2000) & (df['YYYY'] <= 2025)][['YYYY', 'CF4','C2F6','C3
 pfcs['PFCs']=pfcs['CF4'] + pfcs['C2F6'] +pfcs['C3F8'] +pfcs['c-C4F8']
 hfcs['otherHFCs']=hfcs['HFC-23']+hfcs['HFC-32'] +hfcs['HFC-125'] +hfcs['HFC-143a']+ hfcs['HFC-152a']+ hfcs['HFC-227ea'] +hfcs['HFC-236fa'] +hfcs['HFC-245fa'] +hfcs['HFC-365mfc']+hfcs['HFC-43-10mee']
 data3= df[(df['YYYY'] >= 2000) & (df['YYYY'] <= 2025)][['YYYY', 'HCFC-22', 'CH2Cl2']]
-                                                                                                                             
-                                                                                                                             
-                                                                                                                             
-
 
 # %%
-
-
 # Use a color-blind-friendly palette
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -131,16 +115,11 @@ plt.show()
 
 
 # %%
-
-
 #This next part makes table S2 in the supplement
-
 df = df.set_index('YYYY')
 
 
 # %%
-
-
 #code taken from https://github.com/ClimateIndicator/forcing-timeseries/blob/main/notebooks/01_trace-gas-global-mean.py
 # Piers Forster 23 April 2005
 
@@ -262,9 +241,6 @@ radeff = {
 
 
 # %%
-
-
-# %%
 pfc_hfc134a_eq_1750 = 0
 for gas in gases_pfc:
     pfc_hfc134a_eq_1750 = pfc_hfc134a_eq_1750 + (df.loc[1750, gas] * radeff[gas] / radeff['CF4'])
@@ -280,8 +256,6 @@ pfc_hfc134a_eq_1750, hfc_hfc134a_eq_1750, montreal_cfc12_eq_1750
 
 
 # %%
-
-
 pfc_hfc134a_eq_1850 = 0
 for gas in gases_pfc:
     pfc_hfc134a_eq_1850 = pfc_hfc134a_eq_1850 + (df.loc[1850, gas] * radeff[gas] / radeff['CF4'])
@@ -295,11 +269,7 @@ for gas in gases_montreal:
 # %%
 pfc_hfc134a_eq_1850, hfc_hfc134a_eq_1850, montreal_cfc12_eq_1850
 
-
-
 # %%
-
-
 #  note that PFCs are in CF4 units%% 
 pfc_hfc134a_eq_2019 = 0
 for gas in gases_pfc:
@@ -313,11 +283,6 @@ for gas in gases_montreal:
 
 # %%
 pfc_hfc134a_eq_2019, hfc_hfc134a_eq_2019, montreal_cfc12_eq_2019
-
-
-
-# %%
-
 
 # %%
 pfc_hfc134a_eq_2022 = 0
@@ -333,11 +298,6 @@ for gas in gases_montreal:
 # %%
 pfc_hfc134a_eq_2022, hfc_hfc134a_eq_2022, montreal_cfc12_eq_2022
 
-
-
-# %%
-
-
 # %%
 pfc_hfc134a_eq_2023 = 0
 for gas in gases_pfc:
@@ -351,11 +311,6 @@ for gas in gases_montreal:
 
 # %%
 pfc_hfc134a_eq_2023, hfc_hfc134a_eq_2023, montreal_cfc12_eq_2023
-
-
-
-# %%
-
 
 # %%
 pfc_hfc134a_eq_2024 = 0
@@ -372,12 +327,6 @@ for gas in gases_montreal:
 pfc_hfc134a_eq_2024, hfc_hfc134a_eq_2024, montreal_cfc12_eq_2024
 
 # %%
-
-
-# %%
-
-
-# %%
 pfc_hfc134a_eq_2025 = 0
 for gas in gases_pfc:
     pfc_hfc134a_eq_2025 = pfc_hfc134a_eq_2025 + (df.loc[2025, gas] * radeff[gas] / radeff['CF4'])
@@ -392,30 +341,19 @@ for gas in gases_montreal:
 pfc_hfc134a_eq_2025, hfc_hfc134a_eq_2025, montreal_cfc12_eq_2025
 
 # %%
-
-
-# %%
-
-
 df_t=df.transpose()
 df_select=df_t[[1750,1850,2019,2023,2024,2025]]
 
 
 # %%
-
-
 neworder=['CO2','CH4','N2O','NF3','SF6','SO2F2']+['HFCs_total']+gases_hfcs+['PFCs_total']+ gases_pfc+ ['Montreal_total']+gases_montreal
 
 
 # %%
-
-
 df_s_order=df_select.reindex(neworder)
 
 
 # %%
-
-
 #insert sums, note PFCs are in CF4 units not HFC134a
 df_s_order.loc['Montreal_total',[1750,1850,2019,2023,2024,2025]] = \
     [montreal_cfc12_eq_1750, montreal_cfc12_eq_1850, \
@@ -434,26 +372,12 @@ df_s_order.loc['PFCs_total',[1750,1850,2019,2023,2024,2025]] = \
 
 
 # %%
-
-
 #print to one decimal place for table S2
 print(df_s_order.round(1))
 
 
 # %%
-
-
 df_s_order
 
 
 # %%
-
-
-print ('hhg')
-
-
-# %%
-
-
-
-
