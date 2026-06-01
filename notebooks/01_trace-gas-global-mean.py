@@ -27,21 +27,21 @@
 #
 # https://gml.noaa.gov/aftp/data/ is usually a good place to look
 #
-# NOAA (accessed 2026-02-18):
-# - https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_gl.txt  [last year 2024]
-# - https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_annmean_gl.txt  [last year 2024]
-# - https://gml.noaa.gov/webdata/ccgg/trends/n2o/n2o_annmean_gl.txt  [last year 2024]
-# - https://gml.noaa.gov/webdata/ccgg/trends/sf6/sf6_annmean_gl.txt  [last year 2024]
+# NOAA (accessed 2026-05-28):
+# - https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_gl.txt  [last year 2025]
+# - https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_annmean_gl.txt  [last year 2025]
+# - https://gml.noaa.gov/webdata/ccgg/trends/n2o/n2o_annmean_gl.txt  [last year 2025]
+# - https://gml.noaa.gov/webdata/ccgg/trends/sf6/sf6_annmean_gl.txt  [last year 2025]
 # - https://gml.noaa.gov/aftp/data/hats/Total_Cl_Br/2024%20update%20total%20Cl%20Br%20&%20F.xls  (converted to CSV with header and footer rows stripped out; save as noaa_**YYYY**_global_mean_mixing_ratios.csv) **note: each year, check the FTP directory to see if there has been an annual update**  [last year 2023]
 #
 # Data provided by Lindsay Lan on 2016-02-20 for CO2, CH4, N2O, SF6
 #
-# AGAGE (accessed 2026-02-18 from https://zenodo.org/records/18462271)
-# - in previous years we used global mean values put on the AGAGE website available at https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt and https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt. These files are no longer publicly available but there ar data files in the 2025 publication by Luke Western et al. (https://essd.copernicus.org/articles/17/6557/2025/) with the data at https://doi.org/10.5281/zenodo.18462271. This will be used here.
+# AGAGE (accessed 2026-05-28 from https://zenodo.org/records/18878005)
+# - in previous years we used global mean values put on the AGAGE website available at https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_ms.txt and https://agage2.eas.gatech.edu/data_archive/global_mean/global_mean_md.txt. These files are no longer publicly available but there ar data files in the 2025 publication by Luke Western et al. (https://essd.copernicus.org/articles/17/6557/2025/) with the data at https://doi.org/10.5281/zenodo.18878005. This will be used here.
 #
 # Then:
 # - CSIRO for CO2, CH4 and N2O. These values come from Paul Krummel. (In 2025, we commented on CSIRO in the paper but did't use them in the assessment)
-# - AGAGE "horse's mouth" figures from Jens Muhle; CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-125 and N2O. Not sure where this fits now - 2025 update?
+# - AGAGE "horse's mouth" figures from Jens Muhle; CCl4, CFC-11, CFC-12, CH4, HCFC-22, HFC-125 and N2O.
 
 # %%
 import io
@@ -124,8 +124,8 @@ df_noaa
 
 # %%
 zipfile = pooch.retrieve(
-    "https://zenodo.org/records/18462271/files/agage_release_20260202.zip",
-    known_hash = "md5:37420dcb7df5c923b70e54eabe6cf222",
+    "https://zenodo.org/records/18878005/files/agage_release_20260305.zip",
+    known_hash = "md5:ea5ad3f07fe7be271603b765f3c61b56",
     progressbar=True,
 )
 
@@ -187,8 +187,7 @@ df_update = pd.read_csv(
 df_update
 
 # %%
-# NOAA has tended to be up to the last year - at the moment we are awaiting the update. AGAGE has it.
-df_ch4_noaa.loc[1984:2024, 'mean']
+df_ch4_noaa.loc[1984:2025, 'mean']
 
 # %% [markdown]
 # ## AGAGE recent data
@@ -276,11 +275,11 @@ df_conc.tail(11)
 # changing the CO2 scale
 # X2019 = 1.00079*X2007 - 0.142 (from Bradley Hall)
 df_conc.loc[1750:1978, 'CO2'] = df_conc.loc[1750:1978, 'CO2'] * 1.00079 - 0.142
-df_conc.loc[1979:2024, 'CO2'] = df_co2.loc[1979:2024, 'mean']
+df_conc.loc[1979:2025, 'CO2'] = df_co2.loc[1979:2025, 'mean']
 
 # CH4 and N2O is average of NOAA (Lindsay's file) and AGAGE
 # CH4 and N2O are in ppt in AGAGE so need to be rescales
-df_agage.loc[2019:2024, 'CH4'] = df_agage.loc[2019:2024, 'CH4'] / 1000
+df_agage.loc[2019:2025, 'CH4'] = df_agage.loc[2019:2025, 'CH4'] / 1000
 df_agage.loc[2019:2024, 'N2O'] = df_agage.loc[2019:2024, 'N2O'] / 1000
 
 # update names to match what we expect them to be
@@ -320,30 +319,6 @@ for igas, gas in enumerate(['HCFC-22', 'CFC-113', 'HCFC-141b', 'HCFC-142b', 'CH3
     ax[i,j].legend()
 
 # %%
-# # replot with questionable data removed
-# fig, ax = pl.subplots(4,4, figsize=(16, 16))
-# for igas, gas in enumerate(['HCFC-22', 'CFC-113', 'HCFC-141b', 'HCFC-142b', 'CH3CCl3', 'Halon-1211', 'Halon-1301', 'Halon-2402',
-#     'HFC-152a','HFC-143a', 'HFC-125', 'HFC-365mfc', 'HFC-227ea', 'HFC-23', 'SF6']):
-#     i = igas//4
-#     j = igas%4
-#     ax[i,j].plot(df_conc[gas], label='AR6')
-#     ax[i,j].plot(df_noaa_update[gas], label='NOAA')
-#     ax[i,j].plot(df_agage[gas], label='AGAGE')
-#     ax[i,j].set_title(gas)
-#     ax[i,j].set_xlim(1980, 2025)
-#     ax[i,j].legend()
-
-# %%
-# # since we removed HFC-125, add it back here
-# # and we want to use HCFC-22 from AGAGE
-# with warnings.catch_warnings():
-#     warnings.simplefilter('ignore')
-#     for gas in ['HCFC-22', 'HFC-125']:
-#         two_dataset_mean = pd.DataFrame((df_noaa_update[gas] - df_agage_recent[gas])).mean().values[0]
-#         df_conc.loc[2020:2023, gas] = pd.DataFrame((df_noaa_update.loc[2020:2023, gas], df_agage_recent.loc[2020:2023, gas])).mean()
-#         df_conc.loc[2024, gas] = df_agage_recent.loc[2024, gas] - two_dataset_mean
-
-# %%
 # CFC-113 is special case; do the NOAA extrapolation from 2020, and assume the previously given values for 2018 and 2019 are good.
 # we will check this in a new round of plots.
 with warnings.catch_warnings():
@@ -359,10 +334,14 @@ for gas in ["Halon-1301", "HFC-143a", "HFC-125"]:
     df_conc.loc[2024, gas] = df_agage.loc[2024, gas] - two_dataset_mean
 
 # %%
-df_lindsay20260220 = pd.DataFrame([[425.63, 1936.55, 338.86, 12.24]], index=[2025], columns=["CO2", "CH4", "N2O", "SF6"])
+#df_lindsay20260220 = pd.DataFrame([[425.63, 1936.55, 338.86, 12.24]], index=[2025], columns=["CO2", "CH4", "N2O", "SF6"])
+# no need to use these because they are now in the NOAA data
 
 # %%
-df_lindsay20260220
+df_ch4_noaa.loc[2020:2024, 'mean']
+
+# %%
+pd.DataFrame((df_ch4_noaa.loc[2020:2025, 'mean'], df_agage.loc[2020:2025, "CH4"])).mean()
 
 # %%
 # 2025 values from Lindsay provided by email 2016-02-20, all from NOAA
@@ -370,18 +349,17 @@ df_lindsay20260220
 # df_conc.loc[2025, 'N2O'] = 338.86
 # df_conc.loc[2025, 'SF6'] = 12.24
 
-# CO2 is only from NOAA so can go straight in
-df_conc.loc[2025, 'CO2'] = df_lindsay20260220.loc[2025, 'CO2']
+# CH4, N2O and SF6 are mean of NOAA and AGAGE
 
-# CH4, N2O and SF6 are mean of NOAA and AGAGE, extend with NOAA using difference of two
-two_dataset_mean = pd.DataFrame((df_ch4_noaa.loc[2020:2024, 'mean'] - df_agage.loc[2020:2024, "CH4"])).mean().values[0]
-df_conc.loc[2025, 'CH4'] = df_lindsay20260220.loc[2025, 'CH4'] - two_dataset_mean
+# CH4 has values up to 2025
+df_conc.loc[2020:2025, 'CH4'] = pd.DataFrame((df_ch4_noaa.loc[2020:2025, 'mean'], df_agage.loc[2020:2025, "CH4"])).mean()
 
+# N2O and SF6: extend with NOAA using difference of two
 two_dataset_mean = pd.DataFrame((df_n2o_noaa.loc[2020:2024, 'mean'] - df_agage.loc[2020:2024, "N2O"])).mean().values[0]
-df_conc.loc[2025, 'N2O'] = df_lindsay20260220.loc[2025, 'N2O'] - two_dataset_mean
+df_conc.loc[2025, 'N2O'] = df_n2o_noaa.loc[2025, 'mean'] - two_dataset_mean
 
 two_dataset_mean = pd.DataFrame((df_sf6_noaa.loc[2020:2024, 'mean'] - df_agage.loc[2020:2024, "SF6"])).mean().values[0]
-df_conc.loc[2025, 'SF6'] = df_lindsay20260220.loc[2025, 'SF6'] - two_dataset_mean
+df_conc.loc[2025, 'SF6'] = df_sf6_noaa.loc[2025, 'mean'] - two_dataset_mean
 
 # %%
 df_conc.tail(10)
@@ -606,10 +584,6 @@ df_conc.head()
 # %%
 df_conc.tail(11)
 
-# %%
-os.makedirs('../output', exist_ok = True)
-df_conc.to_csv('../output/ghg_concentrations.csv')
-
 # %% [markdown]
 # ## Aggregated categories
 
@@ -726,101 +700,26 @@ radeff = {
 }
 
 # %%
-pfc_hfc134a_eq_1750 = 0
+pfc_cf4_eq = 0
 for gas in gases_pfc:
-    pfc_hfc134a_eq_1750 = pfc_hfc134a_eq_1750 + (df_conc.loc[1750, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_1750 = 0
+    pfc_cf4_eq = pfc_cf4_eq + (df_conc.loc[:, gas] * radeff[gas] / radeff['CF4'])
+hfc_hfc134a_eq = 0
 for gas in gases_hfcs:
-    hfc_hfc134a_eq_1750 = hfc_hfc134a_eq_1750 + (df_conc.loc[1750, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_1750 = 0
+    hfc_hfc134a_eq = hfc_hfc134a_eq + (df_conc.loc[:, gas] * radeff[gas] / radeff['HFC-134a'])
+montreal_cfc12_eq = 0
 for gas in gases_montreal:
-    montreal_cfc12_eq_1750 = montreal_cfc12_eq_1750 + (df_conc.loc[1750, gas] * radeff[gas] / radeff['CFC-12'])
+    montreal_cfc12_eq = montreal_cfc12_eq + (df_conc.loc[:, gas] * radeff[gas] / radeff['CFC-12'])
 
 # %%
-pfc_hfc134a_eq_1750, hfc_hfc134a_eq_1750, montreal_cfc12_eq_1750
+pfc_cf4_eq.rename("PFC[CF4-eq]", inplace=True)
+hfc_hfc134a_eq.rename("HFC[HFC-134a-eq]", inplace=True)
+montreal_cfc12_eq.rename("CFC[CFC-12-eq]", inplace=True)
 
 # %%
-pfc_hfc134a_eq_1850 = 0
-for gas in gases_pfc:
-    pfc_hfc134a_eq_1850 = pfc_hfc134a_eq_1850 + (df_conc.loc[1850, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_1850 = 0
-for gas in gases_hfcs:
-    hfc_hfc134a_eq_1850 = hfc_hfc134a_eq_1850 + (df_conc.loc[1850, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_1850 = 0
-for gas in gases_montreal:
-    montreal_cfc12_eq_1850 = montreal_cfc12_eq_1850 + (df_conc.loc[1850, gas] * radeff[gas] / radeff['CFC-12'])
+df_conc = pd.concat((df_conc, pfc_cf4_eq, hfc_hfc134a_eq, montreal_cfc12_eq), axis=1)
 
 # %%
-pfc_hfc134a_eq_1850, hfc_hfc134a_eq_1850, montreal_cfc12_eq_1850
-
-# %%
-pfc_hfc134a_eq_2019 = 0
-for gas in gases_pfc:
-    pfc_hfc134a_eq_2019 = pfc_hfc134a_eq_2019 + (df_conc.loc[2019, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_2019 = 0
-for gas in gases_hfcs:
-    hfc_hfc134a_eq_2019 = hfc_hfc134a_eq_2019 + (df_conc.loc[2019, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_2019 = 0
-for gas in gases_montreal:
-    montreal_cfc12_eq_2019 = montreal_cfc12_eq_2019 + (df_conc.loc[2019, gas] * radeff[gas] / radeff['CFC-12'])
-
-# %%
-pfc_hfc134a_eq_2019, hfc_hfc134a_eq_2019, montreal_cfc12_eq_2019
-
-# %%
-pfc_hfc134a_eq_2022 = 0
-for gas in gases_pfc:
-    pfc_hfc134a_eq_2022 = pfc_hfc134a_eq_2022 + (df_conc.loc[2022, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_2022 = 0
-for gas in gases_hfcs:
-    hfc_hfc134a_eq_2022 = hfc_hfc134a_eq_2022 + (df_conc.loc[2022, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_2022 = 0
-for gas in gases_montreal:
-    montreal_cfc12_eq_2022 = montreal_cfc12_eq_2022 + (df_conc.loc[2022, gas] * radeff[gas] / radeff['CFC-12'])
-
-# %%
-pfc_hfc134a_eq_2022, hfc_hfc134a_eq_2022, montreal_cfc12_eq_2022
-
-# %%
-pfc_hfc134a_eq_2023 = 0
-for gas in gases_pfc:
-    pfc_hfc134a_eq_2023 = pfc_hfc134a_eq_2023 + (df_conc.loc[2023, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_2023 = 0
-for gas in gases_hfcs:
-    hfc_hfc134a_eq_2023 = hfc_hfc134a_eq_2023 + (df_conc.loc[2023, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_2023 = 0
-for gas in gases_montreal:
-    montreal_cfc12_eq_2023 = montreal_cfc12_eq_2023 + (df_conc.loc[2023, gas] * radeff[gas] / radeff['CFC-12'])
-
-# %%
-pfc_hfc134a_eq_2023, hfc_hfc134a_eq_2023, montreal_cfc12_eq_2023
-
-# %%
-pfc_hfc134a_eq_2024 = 0
-for gas in gases_pfc:
-    pfc_hfc134a_eq_2024 = pfc_hfc134a_eq_2024 + (df_conc.loc[2024, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_2024 = 0
-for gas in gases_hfcs:
-    hfc_hfc134a_eq_2024 = hfc_hfc134a_eq_2024 + (df_conc.loc[2024, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_2024 = 0
-for gas in gases_montreal:
-    montreal_cfc12_eq_2024 = montreal_cfc12_eq_2024 + (df_conc.loc[2024, gas] * radeff[gas] / radeff['CFC-12'])
-
-# %%
-pfc_hfc134a_eq_2024, hfc_hfc134a_eq_2024, montreal_cfc12_eq_2024
-
-# %%
-pfc_hfc134a_eq_2025 = 0
-for gas in gases_pfc:
-    pfc_hfc134a_eq_2025 = pfc_hfc134a_eq_2025 + (df_conc.loc[2025, gas] * radeff[gas] / radeff['CF4'])
-hfc_hfc134a_eq_2025 = 0
-for gas in gases_hfcs:
-    hfc_hfc134a_eq_2025 = hfc_hfc134a_eq_2025 + (df_conc.loc[2025, gas] * radeff[gas] / radeff['HFC-134a'])
-montreal_cfc12_eq_2025 = 0
-for gas in gases_montreal:
-    montreal_cfc12_eq_2025 = montreal_cfc12_eq_2025 + (df_conc.loc[2025, gas] * radeff[gas] / radeff['CFC-12'])
-
-# %%
-pfc_hfc134a_eq_2025, hfc_hfc134a_eq_2025, montreal_cfc12_eq_2025
+os.makedirs('../output', exist_ok = True)
+df_conc.to_csv('../output/ghg_concentrations.csv')
 
 # %%

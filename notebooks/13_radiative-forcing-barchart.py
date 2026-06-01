@@ -65,6 +65,30 @@ for variable in [
     best[variable] = df[variable].values.squeeze()
     unc[variable] = np.percentile(ds[variable], (5, 95), axis=1)
 
+# %%
+ds['aerosol-radiation_interactions'].sel(time=np.arange(2016,2026)).mean(dim='time').quantile((0.05, 0.50, 0.95))
+
+# %%
+ds['aerosol-cloud_interactions'].sel(time=np.arange(2016,2026)).mean(dim='time').quantile((0.05, 0.50, 0.95))
+
+# %%
+(
+    ds['aerosol-radiation_interactions'] +
+    ds['aerosol-cloud_interactions']
+).sel(time=np.arange(2016,2026)).mean(dim='time').quantile((0.05, 0.50, 0.95))
+
+# %%
+ds['aerosol-radiation_interactions'].sel(time=np.arange(2014,2024)).mean(dim='time').quantile((0.05, 0.50, 0.95))
+
+# %%
+ds['aerosol-cloud_interactions'].sel(time=np.arange(2014,2024)).mean(dim='time').quantile((0.05, 0.50, 0.95))
+
+# %%
+(
+    ds['aerosol-radiation_interactions'] +
+    ds['aerosol-cloud_interactions']
+).sel(time=np.arange(2014,2024)).mean(dim='time').quantile((0.05, 0.50, 0.95))
+
 # %% [markdown]
 # ## Aggregated variables
 

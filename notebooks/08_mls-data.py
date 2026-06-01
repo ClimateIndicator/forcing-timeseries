@@ -44,15 +44,15 @@ for year in range(2004, 2026):
     nc.close()
 
 # %%
-data_jan_2025 = np.ones((31, 39)) * np.nan
-for day in range(1, 32):
-    nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3DB-H2O_*_2025d{day:03}.nc')[0])
-    data_jan_2025[day-1, :] = nc.groups['H2O PressureZM'].variables['value'][0, 10:49, 15:30].mean(axis=1)
-    plev = nc.groups['H2O PressureZM'].variables['lev'][10:49]
-    nc.close()
+# data_jan_2025 = np.ones((31, 39)) * np.nan
+# for day in range(1, 32):
+#     nc = Dataset(glob.glob(f'../data/mls/MLS-Aura_L3DB-H2O_*_2025d{day:03}.nc')[0])
+#     data_jan_2025[day-1, :] = nc.groups['H2O PressureZM'].variables['value'][0, 10:49, 15:30].mean(axis=1)
+#     plev = nc.groups['H2O PressureZM'].variables['lev'][10:49]
+#     nc.close()
 
 # %%
-data_jan_2025[data_jan_2025==0] = np.nan
+# data_jan_2025[data_jan_2025==0] = np.nan
 
 # %%
 # month_length = np.array([31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
@@ -456,3 +456,5 @@ np.average(era5_h2o_mass_2025 - era5_h2o_mass_20042021, weights=day_weight_nolea
 
 # %%
 mass_h2o[11+14*12]
+
+# %%

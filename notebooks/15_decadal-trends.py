@@ -19,7 +19,7 @@ import numpy as np
 
 # %%
 # Read in the CSV file with the ERF data
-erf_df = pd.read_csv('../output/ERF_best_aggregates_1750-2024.csv')
+erf_df = pd.read_csv('../output/ERF_best_aggregates.csv')
 
 # %%
 erf_df = erf_df.rename(columns={'Unnamed: 0': 'Year'})
@@ -58,10 +58,10 @@ ax2 = ax1.twinx()
 
 # Plot each series on its respective axis
 ax2.plot(x,y,marker='o', linestyle='None',label='effective radiative forcing trend')
-ax2.plot(x[-5:], y[-5:], marker='o', color='red',linestyle='None')
+ax2.plot(x[-6:], y[-6:], marker='o', color='red',linestyle='None')
 
 ax1.plot(x_GWI,y_GWI,marker='+', linestyle='None',label='human-induced warming trend')
-ax1.plot(x_GWI[-4:], y_GWI[-4:], marker='+', color='red',linestyle='None')
+ax1.plot(x_GWI[-6:], y_GWI[-6:], marker='+', color='red',linestyle='None')
 
 # Add axis labels and legend
 ax1.set_xlabel('End year of decade')
@@ -71,7 +71,7 @@ ax1.set_ylabel('Temperature trend ( °C decade$^{-1}$)')
 ax1.legend(loc='best')
 ax2.legend(loc='center right')
 plt.title('Decadal trends')
-plt.xlim([1970,2025])
+plt.xlim([1970,2026])
 
 # Show the plot
 plt.show()

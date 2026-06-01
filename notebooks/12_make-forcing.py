@@ -630,6 +630,9 @@ concentrations
 concentrations.loc[2024].values.shape
 
 # %%
+concentrations = concentrations.drop(columns=["PFC[CF4-eq]", "HFC[HFC-134a-eq]", "CFC[CFC-12-eq]"])
+
+# %%
 # radiative efficiencies
 # source: Hodnebrog et al 2020 https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2019RG000691
 radeff = {

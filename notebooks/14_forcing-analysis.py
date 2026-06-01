@@ -244,9 +244,6 @@ pl.savefig('../plots/erf_since_2000.png')
 pl.savefig('../plots/erf_since_2000.pdf')
 
 # %%
-print('halogen', np.percentile(halogen[-1,:], (5, 50, 95)), halogen_best[2025])
-
-# %%
 print('total:        ', np.percentile(total[-1, :], (5, 50, 95)))
 print('anthropogenic:', np.percentile(total[-1, :]-natural[-1, :], (5, 50, 95)))
 print('natural:      ', np.percentile(natural[-1, :], (5, 50, 95)))
@@ -261,6 +258,10 @@ print('natural:      ', np.percentile(natural[-1, subset], (5, 50, 95)))
 print('aerosol:      ', np.percentile(aerosol[-1, subset], (5, 50, 95)))
 print('wmghg:        ', np.percentile(wmghg[-1, subset], (5, 50, 95)))
 print('other_ant:    ', np.percentile(other_ant[-1, subset], (5, 50, 95)))
+
+# %%
+# 2016-25 for aerosols
+print('aerosol:      ', np.percentile(aerosol[-10:, subset].mean(axis=0), (5, 50, 95)))
 
 # %%
 # aggregated
