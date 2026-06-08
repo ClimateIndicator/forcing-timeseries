@@ -66,6 +66,12 @@ for variable in [
     unc[variable] = np.percentile(ds[variable], (5, 95), axis=1)
 
 # %%
+(
+    ds['aerosol-radiation_interactions'] +
+    ds['aerosol-cloud_interactions']
+).sel(time=2025).quantile((0.05, 0.50, 0.95))
+
+# %%
 ds['aerosol-radiation_interactions'].sel(time=np.arange(2016,2026)).mean(dim='time').quantile((0.05, 0.50, 0.95))
 
 # %%
@@ -116,6 +122,10 @@ for variable in tqdm(variables):
     if variable in ['aerosol-radiation_interactions', 'aerosol-cloud_interactions']:
         best['aerosol'] = best['aerosol'] + df[variable].values
 
+best['natural'] = best['total'] - best['anthro']
+best['wmghg'] = best['CO2'] + best['nonco2wmghg']
+best['anthro_nonwmghg'] = best['anthro'] - best['wmghg']
+
 # %%
 aerosol     = np.zeros((276, SAMPLES))
 nonco2wmghg = np.zeros((276, SAMPLES))
@@ -139,6 +149,9 @@ for variable in tqdm(variables):
         minor = minor + ds[variable]
     if variable in ['aerosol-radiation_interactions', 'aerosol-cloud_interactions']:
         aerosol = aerosol + ds[variable]
+natural = total - anthro
+wmghg = ds['CO2'] + nonco2wmghg
+anthro_nonwmghg = anthro - wmghg
 
 # %%
 df_best = pd.DataFrame(best, index=np.arange(1750.5, 2026))
@@ -151,6 +164,9 @@ unc['halogen'] = np.percentile(halogen, (5, 95), axis=1)
 unc['anthro'] = np.percentile(anthro, (5, 95), axis=1)
 unc['total'] = np.percentile(total, (5, 95), axis=1)
 unc['minor'] = np.percentile(minor, (5, 95), axis=1)
+unc['natural'] = np.percentile(natural, (5, 95), axis=1)
+unc['wmghg'] = np.percentile(wmghg, (5, 95), axis=1)
+unc['anthro_nonwmghg'] = np.percentile(anthro_nonwmghg, (5, 95), axis=1)
 
 # %%
 df_p05 = pd.DataFrame({key: value[0] for key, value in unc.items()}, index=np.arange(1750.5, 2026))
@@ -318,3 +334,5 @@ pl.savefig('../plots/ERF_timeseries.pdf')
 
 # %%
 ds.close()
+
+# %%
