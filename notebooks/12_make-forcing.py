@@ -1029,7 +1029,7 @@ forcing_p95 = {}
 for agent in tqdm(forcing):
     forcing_p05[agent] = np.percentile(forcing_ensemble[agent],5,axis=1)
     forcing_p95[agent] = np.percentile(forcing_ensemble[agent],95,axis=1)
-    
+
 forcing_p05_sum = np.percentile(forcing_ensemble_sum,5,axis=1)
 forcing_p05_anthro = np.percentile(forcing_ensemble_anthro,5,axis=1)
 forcing_p05_natural = np.percentile(forcing_ensemble_natural,5,axis=1)
@@ -1041,6 +1041,10 @@ forcing_p95_anthro = np.percentile(forcing_ensemble_anthro,95,axis=1)
 forcing_p95_natural = np.percentile(forcing_ensemble_natural,95,axis=1)
 forcing_p95_aerosol = np.percentile(forcing_ensemble_aerosol,95,axis=1)
 forcing_p95_minorghg = np.percentile(forcing_ensemble_minorghg,95,axis=1)
+
+# %%
+pd.DataFrame(forcing_p95, index=np.arange(1750, 2026)).to_csv('../output/ERF_p95.csv')
+pd.DataFrame(forcing_p05, index=np.arange(1750, 2026)).to_csv('../output/ERF_p05.csv')
 
 # %%
 fig, ax = pl.subplots(4,4, figsize=(16,16),squeeze=True)
